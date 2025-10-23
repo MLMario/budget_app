@@ -542,21 +542,20 @@ Settings
 
 ## Visual Design Principles
 
-### Color Coding System
-- **Green**: On track, under budget, positive trends
-- **Yellow**: Warning, approaching limit, needs attention
-- **Red**: Over budget, urgent action needed
-- **Blue**: Neutral information, AI insights
-- **Gray**: Ignored transactions, inactive categories
+### Colors to Use
+
+For Overall Appearance: Use a monocromathic scale of blue that is slick and uses white spaces as the main backgroup color
+For the Coding System: Create a color coding system that is aligened with the overall appearence color choises
+
+### Coding System
+- Positive Situations: On track, under budget, positive trends
+- Medium Alert Situations: Warning, approaching limit, needs attention
+- Alert Situations: Over budget, urgent action needed
+- Neutral Situations: Neutral information, AI insights
+- Ignore Situations: Ignored transactions, inactive categories
 
 ### Icon System
-- 🔒 = Non-negotiable transaction/category
-- 🚫 = Ignored transaction
-- 💡 = AI suggestion
-- ⚠️ = Alert/warning
-- ✅ = Goal on track
-- 📊 = Analysis/report
-- 🎯 = Goal
+- Avoid using Icons in the design
 
 ### Responsive Behavior
 - **Desktop (1200px+)**: 3-column layout as shown
