@@ -60,6 +60,8 @@ desktop.ini
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+.claude/
+.specify/
 
 #specs
 specs/
