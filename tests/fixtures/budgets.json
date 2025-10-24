@@ -1,0 +1,170 @@
+[
+  {
+    "id": "budget_001",
+    "user_id": "user_test_001",
+    "month": 10,
+    "year": 2025,
+    "categories": [
+      {
+        "id": "cat_001",
+        "budget_id": "budget_001",
+        "category_name": "Groceries",
+        "budgeted_amount": 400.00
+      },
+      {
+        "id": "cat_002",
+        "budget_id": "budget_001",
+        "category_name": "Dining Out",
+        "budgeted_amount": 200.00
+      },
+      {
+        "id": "cat_003",
+        "budget_id": "budget_001",
+        "category_name": "Transportation",
+        "budgeted_amount": 150.00
+      },
+      {
+        "id": "cat_004",
+        "budget_id": "budget_001",
+        "category_name": "Entertainment",
+        "budgeted_amount": 100.00
+      },
+      {
+        "id": "cat_005",
+        "budget_id": "budget_001",
+        "category_name": "Utilities",
+        "budgeted_amount": 200.00
+      },
+      {
+        "id": "cat_006",
+        "budget_id": "budget_001",
+        "category_name": "Healthcare",
+        "budgeted_amount": 75.00
+      },
+      {
+        "id": "cat_007",
+        "budget_id": "budget_001",
+        "category_name": "Shopping",
+        "budgeted_amount": 250.00
+      },
+      {
+        "id": "cat_008",
+        "budget_id": "budget_001",
+        "category_name": "Other",
+        "budgeted_amount": 100.00
+      }
+    ]
+  },
+  {
+    "id": "budget_002",
+    "user_id": "user_test_001",
+    "month": 9,
+    "year": 2025,
+    "categories": [
+      {
+        "id": "cat_009",
+        "budget_id": "budget_002",
+        "category_name": "Groceries",
+        "budgeted_amount": 380.00
+      },
+      {
+        "id": "cat_010",
+        "budget_id": "budget_002",
+        "category_name": "Dining Out",
+        "budgeted_amount": 180.00
+      },
+      {
+        "id": "cat_011",
+        "budget_id": "budget_002",
+        "category_name": "Transportation",
+        "budgeted_amount": 140.00
+      },
+      {
+        "id": "cat_012",
+        "budget_id": "budget_002",
+        "category_name": "Entertainment",
+        "budgeted_amount": 90.00
+      },
+      {
+        "id": "cat_013",
+        "budget_id": "budget_002",
+        "category_name": "Utilities",
+        "budgeted_amount": 190.00
+      },
+      {
+        "id": "cat_014",
+        "budget_id": "budget_002",
+        "category_name": "Healthcare",
+        "budgeted_amount": 70.00
+      },
+      {
+        "id": "cat_015",
+        "budget_id": "budget_002",
+        "category_name": "Shopping",
+        "budgeted_amount": 240.00
+      },
+      {
+        "id": "cat_016",
+        "budget_id": "budget_002",
+        "category_name": "Other",
+        "budgeted_amount": 95.00
+      }
+    ]
+  },
+  {
+    "id": "budget_003",
+    "user_id": "user_test_001",
+    "month": 8,
+    "year": 2025,
+    "categories": [
+      {
+        "id": "cat_017",
+        "budget_id": "budget_003",
+        "category_name": "Groceries",
+        "budgeted_amount": 420.00
+      },
+      {
+        "id": "cat_018",
+        "budget_id": "budget_003",
+        "category_name": "Dining Out",
+        "budgeted_amount": 220.00
+      },
+      {
+        "id": "cat_019",
+        "budget_id": "budget_003",
+        "category_name": "Transportation",
+        "budgeted_amount": 160.00
+      },
+      {
+        "id": "cat_020",
+        "budget_id": "budget_003",
+        "category_name": "Entertainment",
+        "budgeted_amount": 110.00
+      },
+      {
+        "id": "cat_021",
+        "budget_id": "budget_003",
+        "category_name": "Utilities",
+        "budgeted_amount": 210.00
+      },
+      {
+        "id": "cat_022",
+        "budget_id": "budget_003",
+        "category_name": "Healthcare",
+        "budgeted_amount": 80.00
+      },
+      {
+        "id": "cat_023",
+        "budget_id": "budget_003",
+        "category_name": "Shopping",
+        "budgeted_amount": 260.00
+      },
+      {
+        "id": "cat_024",
+        "budget_id": "budget_003",
+        "category_name": "Other",
+        "budgeted_amount": 105.00
+      }
+    ]
+  }
+]

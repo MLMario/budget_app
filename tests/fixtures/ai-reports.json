@@ -1,0 +1,129 @@
+[
+  {
+    "id": "report_001",
+    "user_id": "user_test_001",
+    "report_type": "weekly",
+    "generation_date": "2025-10-23T10:00:00Z",
+    "analysis_period_start": "2025-10-16",
+    "analysis_period_end": "2025-10-23",
+    "trajectory_prediction": {
+      "projected_total": 1450.00,
+      "budget_total": 1475.00,
+      "difference": 25.00,
+      "status": "under_budget",
+      "likelihood_percentage": 85
+    },
+    "recommendations": [
+      {
+        "id": "rec_1",
+        "action": "Reduce coffee shop visits by 1 per week",
+        "category": "Dining Out",
+        "expected_savings": 30.00,
+        "implementation": "Visit coffee shops 3 times instead of 4 this week. Your preference for coffee shop work sessions is respected - this is a minor adjustment.",
+        "effort_level": "easy",
+        "preferences_respected": [
+          "Respects your preference that coffee shop visits are important for mental health"
+        ],
+        "rank": 1,
+        "affected_transaction_ids": ["tx_001", "tx_007"]
+      },
+      {
+        "id": "rec_2",
+        "action": "Cook dinner at home instead of dining out once",
+        "category": "Dining Out",
+        "expected_savings": 35.00,
+        "implementation": "Plan one home-cooked meal to replace a restaurant visit this week.",
+        "effort_level": "medium",
+        "preferences_respected": [],
+        "rank": 2,
+        "affected_transaction_ids": ["tx_007"]
+      }
+    ],
+    "confidence_level": 85
+  },
+  {
+    "id": "report_002",
+    "user_id": "user_test_001",
+    "report_type": "monthly",
+    "generation_date": "2025-10-01T10:00:00Z",
+    "analysis_period_start": "2025-09-01",
+    "analysis_period_end": "2025-09-30",
+    "trajectory_prediction": null,
+    "recommendations": [
+      {
+        "id": "rec_3",
+        "action": "Reduce subscription services",
+        "category": "Entertainment",
+        "expected_savings": 50.00,
+        "implementation": "Cancel 2 unused streaming subscriptions. Keep the services you actively use.",
+        "effort_level": "easy",
+        "preferences_respected": [],
+        "rank": 1,
+        "affected_transaction_ids": ["tx_004"]
+      },
+      {
+        "id": "rec_4",
+        "action": "Optimize grocery shopping",
+        "category": "Groceries",
+        "expected_savings": 75.00,
+        "implementation": "Plan meals weekly and buy in bulk. Consider switching to a cheaper store for staples.",
+        "effort_level": "medium",
+        "preferences_respected": [],
+        "rank": 2,
+        "affected_transaction_ids": ["tx_002"]
+      },
+      {
+        "id": "rec_5",
+        "action": "Limit impulse purchases",
+        "category": "Shopping",
+        "expected_savings": 100.00,
+        "implementation": "Wait 24 hours before making non-essential purchases over $50.",
+        "effort_level": "medium",
+        "preferences_respected": [],
+        "rank": 3,
+        "affected_transaction_ids": ["tx_005", "tx_009"]
+      }
+    ],
+    "confidence_level": 92
+  },
+  {
+    "id": "report_003",
+    "user_id": "user_test_001",
+    "report_type": "weekly",
+    "generation_date": "2025-10-16T10:00:00Z",
+    "analysis_period_start": "2025-10-09",
+    "analysis_period_end": "2025-10-16",
+    "trajectory_prediction": {
+      "projected_total": 1520.00,
+      "budget_total": 1475.00,
+      "difference": -45.00,
+      "status": "over_budget",
+      "likelihood_percentage": 78
+    },
+    "recommendations": [
+      {
+        "id": "rec_6",
+        "action": "Skip one major purchase this week",
+        "category": "Shopping",
+        "expected_savings": 80.00,
+        "implementation": "Delay the planned $80 purchase until next month if possible.",
+        "effort_level": "medium",
+        "preferences_respected": [],
+        "rank": 1,
+        "affected_transaction_ids": ["tx_005"]
+      },
+      {
+        "id": "rec_7",
+        "action": "Reduce transportation costs",
+        "category": "Transportation",
+        "expected_savings": 25.00,
+        "implementation": "Use public transit instead of rideshare for 2 trips this week.",
+        "effort_level": "easy",
+        "preferences_respected": [],
+        "rank": 2,
+        "affected_transaction_ids": ["tx_010"]
+      }
+    ],
+    "confidence_level": 78
+  }
+]

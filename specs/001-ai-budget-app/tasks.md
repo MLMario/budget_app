@@ -50,57 +50,57 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 ### Database & Migrations
 
-- [ ] T010 Initialize Supabase local environment using `supabase init` in `supabase/` directory
-- [ ] T011 Create initial database migration in `supabase/migrations/20251023000000_initial_schema.sql` with all 9 tables (users handled by Supabase Auth, user_preferences, bank_connections, transactions, budgets, budget_categories, goals, ai_analysis_reports, recommendation_feedback)
-- [ ] T012 Add database indexes to migration file for performance (user_id, date, plaid_transaction_id, category fields)
-- [ ] T013 Add Row Level Security (RLS) policies to migration file for all tables (users can only access their own data using auth.uid())
-- [ ] T014 Add database constraints to migration file (check tags mutually exclusive, budget amounts > 0, enum validations)
-- [ ] T015 Add database triggers to migration file for updated_at timestamps and audit logging
-- [ ] T016 Enable pgsodium extension in migration file for encrypting plaid_access_token field in bank_connections table
-- [ ] T017 Create seed data file in `supabase/seed.sql` with 3 test users, bank connections, 30-90 days of transactions, budgets, goals, and sample AI reports
-- [ ] T018 Test migration by running `supabase db reset` to verify schema creation and seed data
+- [x] T010 Initialize Supabase local environment using `supabase init` in `supabase/` directory
+- [x] T011 Create initial database migration in `supabase/migrations/20251023000000_initial_schema.sql` with all 9 tables (users handled by Supabase Auth, user_preferences, bank_connections, transactions, budgets, budget_categories, goals, ai_analysis_reports, recommendation_feedback)
+- [x] T012 Add database indexes to migration file for performance (user_id, date, plaid_transaction_id, category fields)
+- [x] T013 Add Row Level Security (RLS) policies to migration file for all tables (users can only access their own data using auth.uid())
+- [x] T014 Add database constraints to migration file (check tags mutually exclusive, budget amounts > 0, enum validations)
+- [x] T015 Add database triggers to migration file for updated_at timestamps and audit logging
+- [x] T016 Enable pgsodium extension in migration file for encrypting plaid_access_token field in bank_connections table
+- [x] T017 Create seed data file in `supabase/seed.sql` with 3 test users, bank connections, 30-90 days of transactions, budgets, goals, and sample AI reports
+- [x] T018 Test migration by running `supabase db reset` to verify schema creation and seed data
 
 ### Type Definitions
 
-- [ ] T019 [P] Generate Supabase database types in `types/database.types.ts` using `supabase gen types typescript`
-- [ ] T020 [P] Create Plaid types in `types/plaid.types.ts` (PlaidTransaction, PlaidLinkSuccess, PlaidWebhookPayload)
-- [ ] T021 [P] Create AI types in `types/ai.types.ts` (WeeklyAnalysisRequest, WeeklyAnalysisResponse, MonthlyReportRequest, MonthlyReportResponse, Recommendation, TrajectoryPrediction)
-- [ ] T022 [P] Create app domain types in `types/index.ts` (User, Transaction, Budget, BudgetCategory, Goal, AIAnalysisReport, RecommendationFeedback, DashboardData)
+- [x] T019 [P] Generate Supabase database types in `types/database.types.ts` using `supabase gen types typescript`
+- [x] T020 [P] Create Plaid types in `types/plaid.types.ts` (PlaidTransaction, PlaidLinkSuccess, PlaidWebhookPayload)
+- [x] T021 [P] Create AI types in `types/ai.types.ts` (WeeklyAnalysisRequest, WeeklyAnalysisResponse, MonthlyReportRequest, MonthlyReportResponse, Recommendation, TrajectoryPrediction)
+- [x] T022 [P] Create app domain types in `types/index.ts` (User, Transaction, Budget, BudgetCategory, Goal, AIAnalysisReport, RecommendationFeedback, DashboardData)
 
 ### Client Initialization
 
-- [ ] T023 [P] Create Supabase client for client components in `lib/supabase/client.ts` using `createClientComponentClient`
-- [ ] T024 [P] Create Supabase client for server components in `lib/supabase/server.ts` using `createServerComponentClient` with cookies
-- [ ] T025 [P] Create Plaid client in `lib/plaid/client.ts` with environment-based configuration (sandbox for dev, production for prod)
-- [ ] T026 [P] Create Claude SDK client in `lib/claude/client.ts` with API key from environment variables
+- [x] T023 [P] Create Supabase client for client components in `lib/supabase/client.ts` using `createClientComponentClient`
+- [x] T024 [P] Create Supabase client for server components in `lib/supabase/server.ts` using `createServerComponentClient` with cookies
+- [x] T025 [P] Create Plaid client in `lib/plaid/client.ts` with environment-based configuration (sandbox for dev, production for prod)
+- [x] T026 [P] Create Claude SDK client in `lib/claude/client.ts` with API key from environment variables
 
 ### Validation & Utilities
 
-- [ ] T027 [P] Create Zod validation schemas in `lib/utils/validation.ts` (email, password, transaction, budget, goal schemas)
-- [ ] T028 [P] Create formatting utilities in `lib/utils/formatting.ts` (formatCurrency, formatDate, formatPercentage functions)
+- [x] T027 [P] Create Zod validation schemas in `lib/utils/validation.ts` (email, password, transaction, budget, goal schemas)
+- [x] T028 [P] Create formatting utilities in `lib/utils/formatting.ts` (formatCurrency, formatDate, formatPercentage functions)
 
 ### Authentication Setup
 
-- [ ] T029 Implement auth service in `services/auth.service.ts` (signUp, signIn, signOut, resetPassword, getSession functions using Supabase Auth)
-- [ ] T030 Create auth middleware in `app/middleware.ts` to protect dashboard routes and redirect unauthenticated users to login
+- [x] T029 Implement auth service in `services/auth.service.ts` (signUp, signIn, signOut, resetPassword, getSession functions using Supabase Auth)
+- [x] T030 Create auth middleware in `app/middleware.ts` to protect dashboard routes and redirect unauthenticated users to login
 
 ### Base UI Components
 
-- [ ] T031 [P] Create base Button component in `components/ui/Button.tsx` with variants (primary, secondary, destructive)
-- [ ] T032 [P] Create base Input component in `components/ui/Input.tsx` with label, error state, and validation
-- [ ] T033 [P] Create base Card component in `components/ui/Card.tsx` for content containers
-- [ ] T034 [P] Create ProgressBar component in `components/ui/ProgressBar.tsx` with color-coded indicators (green < 80%, yellow 80-100%, red > 100%)
-- [ ] T035 [P] Create Loading component in `components/ui/Loading.tsx` for async operations
+- [x] T031 [P] Create base Button component in `components/ui/Button.tsx` with variants (primary, secondary, destructive)
+- [x] T032 [P] Create base Input component in `components/ui/Input.tsx` with label, error state, and validation
+- [x] T033 [P] Create base Card component in `components/ui/Card.tsx` for content containers
+- [x] T034 [P] Create ProgressBar component in `components/ui/ProgressBar.tsx` with color-coded indicators (green < 80%, yellow 80-100%, red > 100%)
+- [x] T035 [P] Create Loading component in `components/ui/Loading.tsx` for async operations
 
 ### Test Infrastructure
 
-- [ ] T036 [P] Create MSW handlers for Plaid API in `tests/mocks/plaid.handlers.ts` (mock transaction sync, link token creation, webhook responses)
-- [ ] T037 [P] Create MSW handlers for Claude SDK in `tests/mocks/claude.handlers.ts` (mock AI analysis responses)
-- [ ] T038 [P] Create test fixtures for transactions in `tests/fixtures/transactions.json` (30 realistic transactions with various categories)
-- [ ] T039 [P] Create test fixtures for budgets in `tests/fixtures/budgets.json` (3 months of budget data)
-- [ ] T040 [P] Create test fixtures for AI reports in `tests/fixtures/ai-reports.json` (sample weekly and monthly reports)
-- [ ] T041 Setup MSW server in `tests/setup.ts` to intercept API calls during tests
-- [ ] T042 Create test utilities in `tests/utils/test-helpers.ts` (createTestUser, createTestTransaction, createTestBudget helpers)
+- [x] T036 [P] Create MSW handlers for Plaid API in `tests/mocks/plaid.handlers.ts` (mock transaction sync, link token creation, webhook responses)
+- [x] T037 [P] Create MSW handlers for Claude SDK in `tests/mocks/claude.handlers.ts` (mock AI analysis responses)
+- [x] T038 [P] Create test fixtures for transactions in `tests/fixtures/transactions.json` (30 realistic transactions with various categories)
+- [x] T039 [P] Create test fixtures for budgets in `tests/fixtures/budgets.json` (3 months of budget data)
+- [x] T040 [P] Create test fixtures for AI reports in `tests/fixtures/ai-reports.json` (sample weekly and monthly reports)
+- [x] T041 Setup MSW server in `tests/setup.ts` to intercept API calls during tests
+- [x] T042 Create test utilities in `tests/utils/test-helpers.ts` (createTestUser, createTestTransaction, createTestBudget helpers)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
