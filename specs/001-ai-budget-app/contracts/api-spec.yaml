@@ -1,0 +1,986 @@
+openapi: 3.0.3
+info:
+  title: AI-Powered Budget App API
+  description: |
+    REST API for the AI-Powered Budget App. This API provides endpoints for
+    Plaid integration, transaction management, budget tracking, and AI analysis.
+
+    **Authentication**: All endpoints require Bearer token authentication using
+    Supabase JWT tokens obtained through the auth flow.
+
+    **Base URL**: `https://your-app.vercel.app/api` (production)
+    **Base URL**: `http://localhost:3000/api` (local development)
+
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://your-app.vercel.app/api
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Plaid
+    description: Plaid integration endpoints (bank connections, webhooks)
+  - name: Transactions
+    description: Transaction management endpoints
+  - name: Budgets
+    description: Budget CRUD and tracking endpoints
+  - name: Goals
+    description: Financial goal management
+  - name: AI Analysis
+    description: AI-powered analysis and recommendations
+  - name: Dashboard
+    description: Dashboard data aggregation
+
+paths:
+  # ============================================================================
+  # Plaid Integration
+  # ============================================================================
+
+  /plaid/link-token:
+    post:
+      summary: Create Plaid Link token
+      description: Generate a Link token to initialize Plaid Link for bank connection
+      tags:
+        - Plaid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+              required:
+                - user_id
+      responses:
+        '200':
+          description: Link token created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidLinkTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /plaid/exchange-token:
+    post:
+      summary: Exchange Plaid public token for access token
+      description: Exchange the public token received from Plaid Link for an access token and create bank connection
+      tags:
+        - Plaid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaidExchangeTokenRequest'
+      responses:
+        '200':
+          description: Bank connection created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidExchangeTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /plaid/webhook:
+    post:
+      summary: Plaid webhook endpoint
+      description: Receive webhook notifications from Plaid for transaction updates
+      tags:
+        - Plaid
+      security: [] # Webhooks use signature verification instead of Bearer auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaidWebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '400':
+          description: Invalid webhook signature or payload
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ============================================================================
+  # Transactions
+  # ============================================================================
+
+  /transactions:
+    get:
+      summary: Get user transactions
+      description: Retrieve paginated list of transactions with optional filters
+      tags:
+        - Transactions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Cursor for pagination (created_at timestamp)
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Filter by start date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: Filter by end date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /transactions/{id}:
+    patch:
+      summary: Update transaction
+      description: Update transaction category, tags, or notes
+      tags:
+        - Transactions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTransactionRequest'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions/bulk-categorize:
+    post:
+      summary: Bulk categorize transactions
+      description: Categorize multiple transactions at once
+      tags:
+        - Transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCategorizeRequest'
+      responses:
+        '200':
+          description: Bulk categorization completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCategorizeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # Budgets
+  # ============================================================================
+
+  /budgets:
+    get:
+      summary: Get user budgets
+      description: Retrieve budgets with optional month/year filter
+      tags:
+        - Budgets
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+            minimum: 2020
+      responses:
+        '200':
+          description: Budgets retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BudgetWithCategories'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create budget
+      description: Create a new budget for a specific month/year
+      tags:
+        - Budgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBudgetRequest'
+      responses:
+        '201':
+          description: Budget created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetWithCategories'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Budget already exists for this month/year
+
+  /budgets/{id}/categories/{category_id}:
+    patch:
+      summary: Update budget category
+      description: Update budgeted amount for a specific category
+      tags:
+        - Budgets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBudgetCategoryRequest'
+      responses:
+        '200':
+          description: Budget category updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetCategory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /budgets/suggest:
+    post:
+      summary: Suggest budget amounts
+      description: Get AI-suggested budget amounts based on historical spending
+      tags:
+        - Budgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuggestBudgetRequest'
+      responses:
+        '200':
+          description: Budget suggestions generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestBudgetResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # AI Analysis
+  # ============================================================================
+
+  /ai/weekly-analysis:
+    post:
+      summary: Trigger weekly AI analysis
+      description: Generate weekly spending trajectory prediction and recommendations
+      tags:
+        - AI Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeeklyAnalysisRequest'
+      responses:
+        '200':
+          description: Weekly analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyAnalysisResponse'
+        '400':
+          description: Insufficient data (< 7 days of transactions)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/monthly-report:
+    post:
+      summary: Generate monthly AI report
+      description: Generate comprehensive monthly spending report with recommendations
+      tags:
+        - AI Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonthlyReportRequest'
+      responses:
+        '200':
+          description: Monthly report generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/reports:
+    get:
+      summary: Get AI analysis reports
+      description: Retrieve past AI analysis reports (weekly/monthly)
+      tags:
+        - AI Analysis
+      parameters:
+        - name: report_type
+          in: query
+          schema:
+            type: string
+            enum: [weekly, monthly]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AIAnalysisReport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/feedback:
+    post:
+      summary: Submit recommendation feedback
+      description: Provide feedback on an AI recommendation
+      tags:
+        - AI Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ai_report_id:
+                  type: string
+                  format: uuid
+                recommendation_id:
+                  type: string
+                feedback_type:
+                  type: string
+                  enum: [helpful, not_helpful, dismissed]
+              required:
+                - ai_report_id
+                - recommendation_id
+                - feedback_type
+      responses:
+        '201':
+          description: Feedback submitted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # Dashboard
+  # ============================================================================
+
+  /dashboard:
+    get:
+      summary: Get dashboard data
+      description: Retrieve aggregated dashboard data (budget utilization, projections, alerts)
+      tags:
+        - Dashboard
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+# ============================================================================
+# Components
+# ============================================================================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT token obtained through authentication
+
+  schemas:
+    # ---- Plaid ----
+    PlaidLinkTokenResponse:
+      type: object
+      properties:
+        link_token:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+
+    PlaidExchangeTokenRequest:
+      type: object
+      properties:
+        public_token:
+          type: string
+        user_id:
+          type: string
+          format: uuid
+      required:
+        - public_token
+        - user_id
+
+    PlaidExchangeTokenResponse:
+      type: object
+      properties:
+        bank_connection_id:
+          type: string
+          format: uuid
+        institution_name:
+          type: string
+        account_type:
+          type: string
+          enum: [checking, savings, credit_card]
+
+    PlaidWebhookPayload:
+      type: object
+      properties:
+        webhook_type:
+          type: string
+        webhook_code:
+          type: string
+        item_id:
+          type: string
+        new_transactions:
+          type: integer
+        removed_transactions:
+          type: array
+          items:
+            type: string
+
+    # ---- Transactions ----
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        bank_connection_id:
+          type: string
+          format: uuid
+        plaid_transaction_id:
+          type: string
+        merchant_name:
+          type: string
+          nullable: true
+        amount:
+          type: number
+          format: decimal
+        date:
+          type: string
+          format: date
+        authorized_date:
+          type: string
+          format: date
+          nullable: true
+        pending:
+          type: boolean
+        payment_channel:
+          type: string
+          enum: [online, in_store, other]
+        category_primary:
+          type: string
+          nullable: true
+        category_detailed:
+          type: string
+          nullable: true
+        user_category_override:
+          type: string
+          nullable: true
+        tag_non_negotiable:
+          type: boolean
+        tag_ignored:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+        location:
+          type: object
+          nullable: true
+        iso_currency_code:
+          type: string
+        original_description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateTransactionRequest:
+      type: object
+      properties:
+        user_category_override:
+          type: string
+          nullable: true
+        tag_non_negotiable:
+          type: boolean
+        tag_ignored:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+
+    BulkCategorizeRequest:
+      type: object
+      properties:
+        transaction_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        category:
+          type: string
+      required:
+        - transaction_ids
+        - category
+
+    BulkCategorizeResponse:
+      type: object
+      properties:
+        success_count:
+          type: integer
+        failure_count:
+          type: integer
+        failed_transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              transaction_id:
+                type: string
+                format: uuid
+              error:
+                type: string
+
+    # ---- Budgets ----
+    BudgetCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        budget_id:
+          type: string
+          format: uuid
+        category_name:
+          type: string
+        budgeted_amount:
+          type: number
+          format: decimal
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BudgetWithCategories:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        month:
+          type: integer
+        year:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetCategory'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateBudgetRequest:
+      type: object
+      properties:
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+          minimum: 2020
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              category_name:
+                type: string
+              budgeted_amount:
+                type: number
+                format: decimal
+      required:
+        - month
+        - year
+        - categories
+
+    UpdateBudgetCategoryRequest:
+      type: object
+      properties:
+        budgeted_amount:
+          type: number
+          format: decimal
+      required:
+        - budgeted_amount
+
+    SuggestBudgetRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        month:
+          type: integer
+        year:
+          type: integer
+      required:
+        - user_id
+        - month
+        - year
+
+    SuggestBudgetResponse:
+      type: object
+      properties:
+        suggested_categories:
+          type: array
+          items:
+            type: object
+            properties:
+              category_name:
+                type: string
+              suggested_amount:
+                type: number
+                format: decimal
+              based_on:
+                type: string
+                enum: [average, last_month, three_month_average]
+
+    # ---- AI Analysis ----
+    WeeklyAnalysisRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        month:
+          type: integer
+        year:
+          type: integer
+        force_regenerate:
+          type: boolean
+      required:
+        - user_id
+        - month
+        - year
+
+    WeeklyAnalysisResponse:
+      type: object
+      properties:
+        report_id:
+          type: string
+          format: uuid
+        trajectory_prediction:
+          $ref: '#/components/schemas/TrajectoryPrediction'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        confidence_level:
+          type: integer
+        analysis_period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+
+    MonthlyReportRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        month:
+          type: integer
+        year:
+          type: integer
+      required:
+        - user_id
+        - month
+        - year
+
+    MonthlyReportResponse:
+      type: object
+      properties:
+        report_id:
+          type: string
+          format: uuid
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        summary:
+          type: object
+        analysis_period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+
+    TrajectoryPrediction:
+      type: object
+      properties:
+        projected_total:
+          type: number
+          format: decimal
+        budget_total:
+          type: number
+          format: decimal
+        difference:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [under_budget, on_track, over_budget]
+        likelihood_percentage:
+          type: integer
+
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        category:
+          type: string
+        expected_savings:
+          type: number
+          format: decimal
+        implementation:
+          type: string
+        effort_level:
+          type: string
+          enum: [easy, medium, hard]
+        preferences_respected:
+          type: array
+          items:
+            type: string
+        rank:
+          type: integer
+        affected_transaction_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    AIAnalysisReport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        report_type:
+          type: string
+          enum: [weekly, monthly]
+        generation_date:
+          type: string
+          format: date-time
+        analysis_period_start:
+          type: string
+          format: date
+        analysis_period_end:
+          type: string
+          format: date
+        trajectory_prediction:
+          $ref: '#/components/schemas/TrajectoryPrediction'
+          nullable: true
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        confidence_level:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    # ---- Dashboard ----
+    DashboardData:
+      type: object
+      properties:
+        current_budget_utilization:
+          type: object
+        projected_monthly_spend:
+          type: object
+        recent_transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        active_alerts:
+          type: array
+          items:
+            type: object
+        recent_ai_recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+
+    # ---- Pagination ----
+    Pagination:
+      type: object
+      properties:
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+
+    # ---- Errors ----
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing Bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
