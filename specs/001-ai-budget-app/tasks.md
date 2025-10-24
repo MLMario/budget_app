@@ -28,15 +28,15 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Next.js 14 project with TypeScript 5.3+ using `npx create-next-app@latest budget_app --typescript --app --tailwind`
-- [ ] T002 [P] Install core dependencies in `package.json`: `@supabase/supabase-js`, `plaid`, `@anthropic-ai/sdk`, `zod`, `vitest`, `@playwright/test`, `msw`
-- [ ] T003 [P] Configure TypeScript in `tsconfig.json` with strict mode, path aliases (`@/` → `./`, `@/types` → `./types`)
-- [ ] T004 [P] Configure ESLint and Prettier in `.eslintrc.json` and `.prettierrc`
-- [ ] T005 [P] Setup Vitest config in `vitest.config.ts` with coverage settings (80% target for services/lib)
-- [ ] T006 [P] Setup Playwright config in `playwright.config.ts` for E2E tests (chromium, firefox, webkit)
-- [ ] T007 Create `.env.local.example` with all required environment variables (SUPABASE_URL, SUPABASE_ANON_KEY, PLAID_CLIENT_ID, PLAID_SECRET, ANTHROPIC_API_KEY, NEXT_PUBLIC_APP_URL)
-- [ ] T008 [P] Create project directory structure: `app/`, `services/`, `lib/`, `types/`, `components/`, `tests/`, `supabase/`
-- [ ] T009 [P] Setup Git repository and `.gitignore` (exclude `.env.local`, `node_modules/`, `.next/`)
+- [x] T001 Initialize Next.js 14 project with TypeScript 5.3+ using `npx create-next-app@latest budget_app --typescript --app --tailwind`
+- [x] T002 [P] Install core dependencies in `package.json`: `@supabase/supabase-js`, `plaid`, `@anthropic-ai/sdk`, `zod`, `vitest`, `@playwright/test`, `msw`
+- [x] T003 [P] Configure TypeScript in `tsconfig.json` with strict mode, path aliases (`@/` → `./`, `@/types` → `./types`)
+- [x] T004 [P] Configure ESLint and Prettier in `.eslintrc.json` and `.prettierrc`
+- [x] T005 [P] Setup Vitest config in `vitest.config.ts` with coverage settings (80% target for services/lib)
+- [x] T006 [P] Setup Playwright config in `playwright.config.ts` for E2E tests (chromium, firefox, webkit)
+- [x] T007 Create `.env.local.example` with all required environment variables (SUPABASE_URL, SUPABASE_ANON_KEY, PLAID_CLIENT_ID, PLAID_SECRET, ANTHROPIC_API_KEY, NEXT_PUBLIC_APP_URL)
+- [x] T008 [P] Create project directory structure: `app/`, `services/`, `lib/`, `types/`, `components/`, `tests/`, `supabase/`
+- [x] T009 [P] Setup Git repository and `.gitignore` (exclude `.env.local`, `node_modules/`, `.next/`)
 
 **Checkpoint**: Project structure ready - foundational infrastructure can now be implemented
 
