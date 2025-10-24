@@ -18,11 +18,11 @@ A new user wants to start tracking their finances with minimal setup time and se
 **Acceptance Scenarios**:
 
 1. **Given** a new user visits the app, **When** they complete the sign-up form with email and password, **Then** their account is created and they are directed to the onboarding flow
-2. **Given** a user is in the onboarding flow, **When** they connect their bank account via Plaid, **Then** the last 30 days of transactions are imported within 30 seconds
+2. **Given** a user is in the onboarding flow, **When** they connect their bank account via Plaid, **Then** the last 30 days of transactions are imported within 30 seconds, OR **When** they click "Skip for now", **Then** they proceed to manual budget setup without transaction import
 3. **Given** transactions have been imported, **When** the system auto-categorizes them, **Then** transactions are grouped into standard categories (Groceries, Dining, Transportation, Entertainment, Other)
 4. **Given** categorized transactions exist, **When** the user reaches budget setup, **Then** the system suggests budget amounts based on the imported transaction averages
 5. **Given** suggested budgets are presented, **When** the user accepts or adjusts them, **Then** a budget for the current month is created
-6. **Given** the onboarding is complete, **When** the user reaches the dashboard, **Then** they see their budget health score, spending by category, and recent transactions within 5 minutes of starting signup
+6. **Given** the onboarding is complete, **When** the user reaches the dashboard, **Then** they see their suggested budget amounts, spending by category, and recent transactions within 5 minutes of starting signup
 
 ---
 
@@ -125,23 +125,45 @@ A user wants to define their financial goals and articulate their preferences/co
 
 ---
 
-### User Story 7 - Dashboard Budget Health Monitoring (Priority: P2)
+### User Story 7 - Dashboard Budget Utilization and Projection Monitoring (Priority: P2)
 
-A user wants to see their overall budget health at a glance when they log in, with prominent visual indicators and quick access to the most important information.
+A user wants to see their current budget utilization and projected monthly spend at a glance when they log in, with clear visual indicators and quick access to the most important information.
 
-**Why this priority**: Delivers on the "proactive at-a-glance" design philosophy. Surfaces critical information without requiring navigation. Builds on P1 budget tracking by adding synthesis and visualization.
+**Why this priority**: Delivers on the "proactive at-a-glance" design philosophy. Surfaces two critical metrics without requiring navigation: actual spending status (utilization) and AI-predicted trajectory (projection). Builds on P1 budget tracking by adding real-time visualization and forward-looking insights.
 
-**Independent Test**: Can be tested by viewing the dashboard with various spending scenarios and verifying the health score, visual indicators, and alerts accurately reflect the budget state. Delivers value as an information synthesis layer.
+**Independent Test**: Can be tested by viewing the dashboard with various spending scenarios and verifying that current budget utilization, projected monthly spend (when applicable), visual indicators, and alerts accurately reflect the budget state. Delivers value as an information synthesis layer.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user logs into the app, **When** they reach the dashboard, **Then** they immediately see a Budget Health Score (0-100) with a large circular progress indicator
-2. **Given** spending patterns exist, **When** the health score is calculated, **Then** it considers current spending vs budget, trajectory to month-end, and number of categories at risk
-3. **Given** the health score is displayed, **When** the user views it, **Then** they see a short status message (e.g., "You're on track! But watch dining out spending")
-4. **Given** budget alerts exist, **When** the user views the right panel, **Then** they see active alerts for categories over 90% or price changes affecting budgets
-5. **Given** recent AI recommendations exist, **When** the dashboard loads, **Then** the 2-3 most impactful recommendations are displayed with quick action buttons
-6. **Given** spending by category data exists, **When** the user views the dashboard, **Then** they see a visual breakdown of top categories with progress bars and percentage indicators
-7. **Given** recent transactions exist, **When** the dashboard displays them, **Then** users can take quick actions (Ignore/Non-negotiable/Recategorize) without leaving the dashboard
+1. **Given** a user logs into the app, **When** they reach the dashboard, **Then** they immediately see their Current Budget Utilization showing total spent, total budget, and percentage used (e.g., "$3,200 / $5,000 - 64%")
+2. **Given** a user has at least 1 week of transaction data, **When** the dashboard loads, **Then** they see Projected Monthly Spend showing the AI-predicted end-of-month total with comparison to budget (e.g., "Projected: $4,850 by month-end - under budget by $150")
+3. **Given** a user has less than 1 week of transaction data (e.g., just completed onboarding), **When** they view the dashboard, **Then** the Projected Monthly Spend section displays "Building your spending baseline..." message instead of a projection
+4. **Given** budget utilization data exists, **When** the user views the Current Budget Utilization, **Then** they see a horizontal progress bar with color indicators: green (<80% of budget), yellow (80-100% of budget), red (>100% of budget)
+5. **Given** a projection is available, **When** the Projected Monthly Spend is displayed, **Then** it shows the predicted amount, comparison to budget (over/under), and confidence level percentage
+6. **Given** budget alerts exist, **When** the user views the right panel, **Then** they see active alerts for categories over 90% or price changes affecting budgets
+7. **Given** recent AI recommendations exist, **When** the dashboard loads, **Then** the 2-3 most impactful recommendations are displayed with quick action buttons
+8. **Given** spending by category data exists, **When** the user views the dashboard, **Then** they see a visual breakdown of top categories with progress bars and percentage indicators
+9. **Given** recent transactions exist, **When** the dashboard displays them, **Then** users can take quick actions (Ignore/Non-negotiable/Recategorize) without leaving the dashboard
+
+---
+
+### User Story 8 - AI Recommendation Feedback and Interaction (Priority: P2)
+
+A user wants to interact with AI recommendations by providing feedback, getting more details, or dismissing suggestions that don't apply to their situation.
+
+**Why this priority**: Enables the AI to learn from user preferences and improve recommendation quality over time. Critical for personalization and user trust in the AI system. Builds on P2 AI features by adding feedback loops.
+
+**Independent Test**: Can be tested by displaying AI recommendations with action buttons, verifying feedback is captured, and confirming dismissed recommendations don't reappear. Delivers value by improving recommendation relevance.
+
+**Acceptance Scenarios**:
+
+1. **Given** an AI recommendation is displayed, **When** the user views it, **Then** they see action buttons for "Helpful", "Not helpful", "Tell me more", and "Dismiss"
+2. **Given** a user finds a recommendation useful, **When** they click "Helpful", **Then** the system records positive feedback and shows similar recommendations in the future
+3. **Given** a user finds a recommendation not applicable, **When** they click "Not helpful", **Then** the system records negative feedback and reduces similar recommendations in the future
+4. **Given** a user wants more context, **When** they click "Tell me more", **Then** the recommendation expands to show detailed explanation, affected transactions, and implementation steps
+5. **Given** an expanded recommendation is shown, **When** the user views the details, **Then** they see which specific transactions led to the recommendation and the calculation behind the savings estimate
+6. **Given** a user doesn't want to see a recommendation again, **When** they click "Dismiss", **Then** the recommendation is hidden and won't appear in future reports for that specific suggestion
+7. **Given** a user has dismissed multiple recommendations, **When** they navigate to AI Insights, **Then** they can view a "Dismissed Recommendations" section to re-enable suggestions if preferences change
 
 ---
 
@@ -186,6 +208,29 @@ A user wants to see their overall budget health at a glance when they log in, wi
   - Display "No spending" with green indicator
   - Monthly report should acknowledge: "Successfully avoided spending in [category]"
   - Don't suggest reducing budget to $0 automatically - user may want to maintain budget for future months
+
+- What happens when a user provides conflicting feedback on similar recommendations (e.g., marks "reduce coffee spending" as helpful one week, not helpful the next)?
+  - System should track feedback chronologically and weight recent feedback more heavily
+  - After 3+ conflicting signals, prompt user: "We notice mixed feedback on this type of recommendation. Would you like to adjust your preferences?"
+  - Allow user to provide context in their preferences text to clarify situational differences
+
+- How does the system handle users who skip bank connection during onboarding and never import transactions?
+  - Dashboard displays a persistent, dismissible prompt: "Connect your bank to enable AI insights"
+  - Budget tracking still functions with manual entry, but AI features remain disabled
+  - Weekly/monthly AI reports show: "Unable to generate recommendations - no transaction data available. Connect bank to unlock insights."
+  - User can connect bank at any time through Settings or dashboard quick action
+
+- What if a user dismisses all AI recommendations repeatedly - does the system stop generating them?
+  - System continues to generate recommendations but reduces display frequency after multiple dismissals
+  - After 5+ consecutive dismissals across different recommendation types, show prompt: "Would you like to pause AI recommendations?"
+  - Provide option to pause all recommendations, pause specific types, or adjust recommendation aggressiveness
+  - Always maintain option to re-enable recommendations in Settings
+
+- How does the system handle bulk transaction actions if some transactions fail validation?
+  - Display summary: "X of Y transactions updated successfully, Z failed"
+  - List failed transactions with specific error reasons (e.g., "Transaction already ignored", "Invalid category")
+  - Provide option to retry failed transactions individually or skip and continue
+  - Successful operations are committed; failed operations do not roll back successful ones
 
 ## Requirements *(mandatory)*
 
@@ -272,8 +317,10 @@ A user wants to see their overall budget health at a glance when they log in, wi
 
 #### Dashboard and Visualization
 
-- **FR-059**: System MUST display a Budget Health Score (0-100) on the main dashboard
-- **FR-060**: Budget Health Score MUST be calculated based on current spending vs budget, trajectory, and number of at-risk categories
+- **FR-059**: System MUST display Current Budget Utilization on the main dashboard showing total spent, total budget, percentage used, and a visual progress indicator
+- **FR-060**: System MUST display Projected Monthly Spend on the main dashboard showing AI-predicted end-of-month total with comparison to budget and confidence level
+- **FR-060a**: Projected Monthly Spend MUST only be displayed for users with at least 1 week (7 days) of transaction data; users with less than 1 week see "Building your spending baseline..." message
+- **FR-060b**: Current Budget Utilization MUST use color-coded progress indicators: green for <80% of budget, yellow for 80-100% of budget, red for >100% of budget
 - **FR-061**: Dashboard MUST display a summary of spending by category for the current month
 - **FR-062**: Dashboard MUST show recent transactions (at least the last 10)
 - **FR-063**: Dashboard MUST display active alerts for budget warnings
@@ -286,6 +333,76 @@ A user wants to see their overall budget health at a glance when they log in, wi
 - **FR-067**: System MUST send email notifications when monthly AI reports are completed
 - **FR-068**: System MUST send notifications when a category budget reaches 90% of limit
 - **FR-069**: System MUST send notifications when a category budget exceeds 100%
+
+#### AI Recommendation Interaction
+
+- **FR-070**: Users MUST be able to provide feedback on AI recommendations with "Helpful" or "Not helpful" options
+- **FR-071**: System MUST track recommendation feedback to improve future suggestion relevance and personalization
+- **FR-072**: Users MUST be able to expand AI recommendations to view detailed explanations including affected transactions and calculation methodology
+- **FR-073**: Users MUST be able to dismiss AI recommendations they don't want to see again for that specific suggestion
+- **FR-074**: System MUST maintain a "Dismissed Recommendations" section where users can re-enable previously dismissed suggestions
+
+#### Navigation and User Interface
+
+- **FR-075**: System MUST provide main navigation with sections: Dashboard, Transactions, Budgets, AI Insights, Goals & Preferences, and Reports
+- **FR-076**: System MUST allow users to skip bank connection during onboarding and proceed with manual budget setup
+
+#### Bulk Operations
+
+- **FR-077**: System MUST support bulk selection of transactions for applying actions to multiple transactions simultaneously
+- **FR-078**: Users MUST be able to bulk categorize multiple selected transactions to the same category
+
+### Non-Functional Requirements
+
+#### User Interface & User Experience
+
+- **NFR-001**: System MUST implement a 3-column grid layout on desktop (left navigation sidebar, main content area, right alerts panel)
+- **NFR-002**: Navigation sidebar MUST include all main sections: Dashboard, Transactions, Budgets, AI Insights, Goals & Preferences, Reports, Settings
+- **NFR-003**: System MUST support responsive design with defined breakpoints: Desktop (1200px+), Tablet (768-1199px), Mobile (<768px)
+- **NFR-004**: On tablet viewports, the right panel MUST move below main content in a 2-column layout
+- **NFR-005**: On mobile viewports, the system MUST display a single-column layout with bottom navigation bar replacing the sidebar
+- **NFR-006**: Current Budget Utilization MUST be displayed with a horizontal progress bar and large numeric display showing amount spent, total budget, and percentage (e.g., "$3,200 / $5,000 - 64%")
+- **NFR-007**: All budget progress MUST use horizontal progress bars with percentage indicators
+- **NFR-008**: System MUST implement one-click actions without requiring navigation to different pages for common tasks
+
+#### Visual Design System
+
+- **NFR-009**: Visual design MUST use a monochromatic blue color scheme with white space as the primary background
+- **NFR-010**: Color coding system MUST use consistent colors for: Budget Utilization indicators (green <80%, yellow 80-100%, red >100%), Positive trends (on track/under budget), Warning states (90%+ of budget), Alert states (over budget), Neutral information, Ignored items (grayed out)
+- **NFR-011**: System MUST avoid using icons in favor of text labels for clarity and accessibility
+- **NFR-012**: All status indicators MUST use both color and text to convey information (not color alone)
+- **NFR-013**: Font sizes MUST be adjustable and support browser zoom without breaking layouts
+
+#### Performance
+
+- **NFR-014**: Dashboard page load time MUST be under 2 seconds for users with up to 1000 transactions
+- **NFR-015**: Projected Monthly Spend calculation MUST complete in under 500 milliseconds
+- **NFR-015a**: Dashboard MUST clearly distinguish between Current Budget Utilization (actual data) and Projected Monthly Spend (AI prediction) using visual design elements such as labels, icons, or borders
+- **NFR-016**: Transaction list rendering MUST support pagination or virtualization for smooth scrolling with 1000+ items
+- **NFR-017**: All user interactions MUST provide immediate visual feedback (loading states, button states)
+- **NFR-018**: API response times for data retrieval MUST be under 1 second for 95% of requests
+
+#### Accessibility
+
+- **NFR-019**: System MUST comply with WCAG 2.1 Level AA standards
+- **NFR-020**: All interactive elements MUST be accessible via keyboard navigation with visible focus indicators
+- **NFR-021**: Color contrast ratios MUST meet minimum 4.5:1 for normal text and 3:1 for large text
+- **NFR-022**: All form inputs MUST have associated labels and error messages
+- **NFR-023**: Screen reader announcements MUST be provided for dynamic content updates
+- **NFR-024**: All images and visual elements MUST have appropriate alt text or ARIA labels
+
+#### Browser Compatibility
+
+- **NFR-025**: System MUST support the latest 2 versions of Chrome, Firefox, Safari, and Edge browsers
+- **NFR-026**: JavaScript MUST be required for core functionality (progressive enhancement not required for v1)
+- **NFR-027**: System MUST gracefully handle browsers with JavaScript disabled by displaying an informational message
+
+#### Security (User-Facing Requirements)
+
+- **NFR-028**: All data transmission MUST occur over HTTPS
+- **NFR-029**: Session timeout MUST occur after 30 minutes of inactivity with automatic logout
+- **NFR-030**: Password requirements MUST be clearly communicated during account creation
+- **NFR-031**: Bank connection status MUST be clearly visible with re-authentication prompts when needed
 
 ### Key Entities *(mandatory)*
 
@@ -315,8 +432,15 @@ A user wants to see their overall budget health at a glance when they log in, wi
 - **SC-011**: User can perform transaction management actions (recategorize, tag, ignore) in a single click from any transaction view
 - **SC-012**: System supports 10,000 concurrent users without performance degradation
 - **SC-013**: All user data including bank tokens and personal information is encrypted at rest and in transit
-- **SC-014**: Budget Health Score calculation completes in under 500 milliseconds
+- **SC-014**: Projected Monthly Spend calculation completes in under 500 milliseconds
 - **SC-015**: AI analysis (weekly or monthly) completes within 15 minutes of triggering for 99% of users
+- **SC-016**: All interactive elements are keyboard accessible without requiring a mouse, supporting full keyboard navigation
+- **SC-017**: Color is not the only means of conveying information (text labels or patterns accompany all color-coded indicators)
+- **SC-018**: Text contrast ratios meet WCAG 2.1 AA standards with minimum 4.5:1 ratio for normal text
+- **SC-019**: Screen readers can navigate and understand all content with proper semantic HTML and ARIA labels
+- **SC-020**: UI supports browser zoom up to 200% without loss of functionality or content overlap
+- **SC-021**: Responsive design adapts seamlessly to mobile (< 768px), tablet (768-1199px), and desktop (1200px+) viewports
+- **SC-022**: Users can dismiss an AI recommendation and it will not reappear in future reports for that specific suggestion type
 
 ## Assumptions
 
@@ -334,7 +458,17 @@ A user wants to see their overall budget health at a glance when they log in, wi
 - System stores historical data indefinitely for trend analysis (with user consent per privacy policy)
 - "Non-negotiable" tag is a boolean flag that AI respects but doesn't prevent manual budget adjustments
 - Weekly check-ins run every Monday regardless of when the month started
-- Budget Health Score uses a proprietary algorithm that weights: current spending percentage (40%), trajectory prediction (40%), and number of at-risk categories (20%)
+- **Projected Monthly Spend Methodology**: Uses AI analysis of current spending pace, historical spending patterns (if available), day-of-month progression, and remaining days to predict end-of-month total spending
+- **Current Budget Utilization Calculation**: Simple calculation of (Total Spent / Total Budget) × 100, displayed with color-coded progress bar
+- **Projection Confidence Threshold**: Users with less than 1 week (7 days) of transaction data do not see Projected Monthly Spend to avoid unreliable predictions; instead they see "Building your spending baseline..." message
+- **Design Philosophy - Dashboard-First**: Most critical information is visible on the main dashboard without requiring deep navigation into sub-sections
+- **Design Philosophy - Progressive Disclosure**: Detailed information is available on-demand through expandable sections and drill-down views without cluttering primary interfaces
+- **Design Philosophy - One-Click Actions**: Common tasks (recategorize, tag, ignore) require minimal steps to reduce friction and cognitive load
+- **Design Philosophy - Proactive vs Reactive**: System surfaces insights and predictions before users need to search for them, emphasizing forward-looking recommendations
+- **Design Philosophy - Context-Aware AI**: All AI recommendations explicitly state which user preferences they respect to build trust and demonstrate personalization
+- **Visual Design - Monochromatic Blue**: Color scheme uses shades of blue with white space as primary background to create a calm, professional aesthetic
+- **Visual Design - Text Over Icons**: Icons are avoided in favor of clear text labels to improve accessibility and reduce learning curve
+- **Visual Design - Consistent Color Coding**: Budget status uses consistent colors (green for on-track, yellow/orange for warning, red for alert) always accompanied by text indicators
 
 ## Out of Scope
 
@@ -357,3 +491,79 @@ The following are explicitly NOT included in this feature:
 - Merchant-level price comparison or cashback suggestions
 - Subscription detection and management
 - Budget sharing or export to other financial software
+- Conversational AI chat interface (the "Chat with AI about this" feature from design proposal is not included in v1)
+- Advanced bulk editing workflows beyond basic categorization
+- Custom report templates or scheduling of AI analyses
+- Third-party integrations beyond Plaid (no Mint, YNAB, or other platform imports)
+- White-labeling or multi-tenant support for business use
+- Automated transaction splitting across multiple categories (users can manually split if needed)
+- Real-time collaborative budgeting features
+- Cryptocurrency or digital wallet tracking
+
+## Design Reference
+
+This specification is aligned with **[design-proposal-1.md](../../../design-proposal-1.md)** (Dashboard-Centric Design), which follows the "Everything at a Glance" design philosophy.
+
+### Key Design Principles from Proposal
+
+**Core Philosophy**: "Everything at a Glance" - All critical information on the main dashboard with real-time insights. Reduces cognitive load by surfacing the most important information first, with progressive disclosure for details.
+
+**Problem-Solution Mapping**:
+- **Proactive Dashboard**: Current Budget Utilization and Projected Monthly Spend widgets show real-time spending status and AI trajectory prediction with clear visual indicators (green/yellow/red) visible immediately on login
+- **Contextual AI Cards**: Recommendations always show WHY (based on your stated preferences) and offer alternatives
+- **Preference-Aware Tags**: Non-negotiable transactions have special badge; AI visually acknowledges these constraints in all suggestions
+
+### Screen Structure (6 Main Screens)
+
+1. **Main Dashboard (Home Screen)**: 3-column grid layout (left sidebar navigation, main content with Current Budget Utilization, Projected Monthly Spend, and AI recommendations, right panel with alerts)
+2. **Transactions Screen**: Detailed transaction management with quick actions for categorization, tagging, filtering, and bulk operations
+3. **Budgets Screen**: Monthly budget creation and tracking with visual progress indicators and future month planning
+4. **AI Insights Screen**: Centralized view of weekly check-ins and monthly reports with expandable recommendations
+5. **Goals & Preferences Screen**: Financial goal creation and free-form preference text entry for AI personalization
+6. **Account Setup & Onboarding**: Multi-step onboarding flow with Plaid integration and optional skip paths
+
+### Responsive Behavior
+
+- **Desktop (1200px+)**: Full 3-column layout as designed
+- **Tablet (768-1199px)**: 2-column layout, right panel moves below main content
+- **Mobile (<768px)**: Single column, bottom navigation bar replaces sidebar
+
+### Visual Design Guidelines
+
+**Color System**:
+- Overall appearance: Monochromatic blue scale with white space as main background
+- Positive situations (on track): Green indicators
+- Medium alert (90%+ budget): Yellow/orange warnings
+- Alert situations (over budget): Red alerts
+- Neutral information: Blue tones
+- Ignored items: Grayed out
+
+**Typography & Icons**:
+- Avoid icons in the design; use clear text labels instead
+- All color indicators must have accompanying text labels (not color-only)
+- Font size adjustable for WCAG 2.1 AA compliance
+
+### User Flows from Design Proposal
+
+1. **Flow 1 - New User Onboarding**: Sign up → Connect bank via Plaid (or skip) → Auto-categorize transactions → Quick budget setup → Dashboard in <5 minutes
+2. **Flow 2 - Weekly Check-In Interaction**: Monday email notification → View trajectory prediction → Review suggestions → Take action (tag/adjust) → See updated prediction
+3. **Flow 3 - Transaction Management with AI Learning**: New transaction → AI categorizes → User recategorizes → System prompts for pattern → AI learns and improves
+4. **Flow 4 - Monthly Report to Action**: 1st of month notification → View top recommendations → See "why" and "respects" context → Implement suggestion → AI tracks in future
+
+### Success Metrics from Design
+
+- Time to first insight: <5 minutes from signup
+- Weekly engagement: User checks prediction within 24 hours
+- AI recommendation adoption: >30% tried by users
+- Categorization accuracy: 95%+ after 2 weeks
+- Goal achievement: 60%+ of users hit monthly goals after 3 months
+
+### Key Differentiators
+
+1. **Proactive Dashboard**: Budget utilization and projected spend visible immediately, not buried
+2. **Context-Aware AI**: Every recommendation shows "Respects your preference to..."
+3. **One-Click Actions**: Tag as non-negotiable, recategorize, ignore - all single clicks
+4. **Visual Preference Acknowledgment**: Non-negotiable badge visible on transactions and in AI insights
+5. **Weekly Predictions**: Not just "you spent $X" but "at this pace, you'll finish at $Y"
+
+For detailed screen layouts, wireframes, and complete user flow diagrams, refer to the design proposal document.
