@@ -1,8 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Bash(*)"
+      "Bash(npm install:*)",
+      "Bash(npm run test:*)",
+      "Bash(supabase status:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []
