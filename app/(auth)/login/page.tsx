@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from '@/services/auth.service';
+import { signInAction } from '@/app/actions/auth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn(email, password);
+      const result = await signInAction(email, password);
 
       if (result.error) {
         setError('Invalid email or password. Please try again.');

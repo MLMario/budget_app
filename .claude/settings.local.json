@@ -5,7 +5,9 @@
       "Bash(npm run test:*)",
       "Bash(supabase status:*)",
       "Bash(docker ps:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(head:*)",
+      "Bash(timeout 15 npm run dev:*)"
     ],
     "deny": [],
     "ask": []

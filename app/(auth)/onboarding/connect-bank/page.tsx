@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PlaidLink from '@/components/plaid/PlaidLink';
 import Button from '@/components/ui/Button';
-import { exchangePublicToken } from '@/services/plaid.service';
-import { getSession } from '@/services/auth.service';
+import { exchangePublicTokenAction } from '@/app/actions/plaid';
+import { getSessionAction } from '@/app/actions/auth';
 
 export default function ConnectBankPage() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function ConnectBankPage() {
   // Get user ID on mount
   useState(() => {
     async function fetchUserId() {
-      const session = await getSession();
+      const session = await getSessionAction();
       if (session.session?.user) {
         setUserId(session.session.user.id);
       }
@@ -34,7 +34,7 @@ export default function ConnectBankPage() {
         return;
       }
 
-      const result = await exchangePublicToken(userId, publicToken);
+      const result = await exchangePublicTokenAction(userId, publicToken);
 
       if (result.error) {
         setError('Failed to connect bank. Please try again.');

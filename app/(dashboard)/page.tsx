@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession } from '@/services/auth.service';
-import { getBudgetByMonth, calculateSpending } from '@/services/budget.service';
-import { getTransactionsByUser } from '@/services/transaction.service';
+import { getSessionAction } from '@/app/actions/auth';
+import { getBudgetByMonthAction, calculateSpendingAction } from '@/app/actions/budget';
+import { getTransactionsByUserAction } from '@/app/actions/transaction';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadDashboard() {
-      const session = await getSession();
+      const session = await getSessionAction();
       if (!session.session?.user) {
         router.push('/login');
         return;
@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
       // Get current month budget
       const now = new Date();
-      const budget = await getBudgetByMonth(userId, now.getMonth() + 1, now.getFullYear());
+      const budget = await getBudgetByMonthAction(userId, now.getMonth() + 1, now.getFullYear());
 
       if (budget) {
         setBudgetData(budget);
@@ -41,12 +41,12 @@ export default function DashboardPage() {
         setTotalBudget(total);
 
         // Calculate total spending
-        const spent = await calculateSpending(userId, now.getMonth() + 1, now.getFullYear());
+        const spent = await calculateSpendingAction(userId, now.getMonth() + 1, now.getFullYear());
         setTotalSpent(spent);
       }
 
       // Get recent transactions
-      const transactions = await getTransactionsByUser(userId);
+      const transactions = await getTransactionsByUserAction(userId);
       setRecentTransactions(transactions.slice(0, 10));
 
       setIsLoading(false);

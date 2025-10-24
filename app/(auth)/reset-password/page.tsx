@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { resetPassword } from '@/services/auth.service';
+import { resetPasswordAction } from '@/app/actions/auth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const result = await resetPassword(email);
+      const result = await resetPasswordAction(email);
 
       if (result.error) {
         setError(result.error.message || 'An error occurred');

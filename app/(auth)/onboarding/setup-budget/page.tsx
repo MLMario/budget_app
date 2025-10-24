@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { suggestBudgetAmounts, createBudget } from '@/services/budget.service';
-import { getSession } from '@/services/auth.service';
+import { suggestBudgetAmountsAction, createBudgetAction } from '@/app/actions/budget';
+import { getSessionAction } from '@/app/actions/auth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
@@ -28,7 +28,7 @@ export default function SetupBudgetPage() {
 
   useEffect(() => {
     async function initialize() {
-      const session = await getSession();
+      const session = await getSessionAction();
       if (!session.session?.user) {
         router.push('/login');
         return;
@@ -38,7 +38,7 @@ export default function SetupBudgetPage() {
       setUserId(uid);
 
       // Get suggested amounts
-      const suggestions = await suggestBudgetAmounts(uid);
+      const suggestions = await suggestBudgetAmountsAction(uid);
 
       // Initialize with suggestions or defaults
       const initialAmounts: Record<string, number> = {};
@@ -74,7 +74,7 @@ export default function SetupBudgetPage() {
 
     try {
       const now = new Date();
-      const result = await createBudget(userId, {
+      const result = await createBudgetAction(userId, {
         month: now.getMonth() + 1,
         year: now.getFullYear(),
         categories: budgetAmounts,
