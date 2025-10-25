@@ -32,6 +32,7 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
     await page.goto('/signup');
     await page.fill('[data-testid="email-input"]', testEmail);
     await page.fill('[data-testid="password-input"]', testPassword);
+    await page.fill('[data-testid="confirm-password-input"]', testPassword);
     await page.click('[data-testid="signup-button"]');
 
     // Wait for redirect to onboarding

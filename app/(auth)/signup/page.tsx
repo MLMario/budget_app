@@ -94,6 +94,7 @@ export default function SignupPage() {
                     <Mail className="h-5 w-5 text-slate-400" />
                   </div>
                   <Input
+                    data-testid="email-input"
                     label="Email address"
                     type="email"
                     name="email"
@@ -113,6 +114,7 @@ export default function SignupPage() {
                     <Lock className="h-5 w-5 text-slate-400" />
                   </div>
                   <Input
+                    data-testid="password-input"
                     label="Password"
                     type="password"
                     name="password"
@@ -132,6 +134,7 @@ export default function SignupPage() {
                     <CheckCircle2 className="h-5 w-5 text-slate-400" />
                   </div>
                   <Input
+                    data-testid="confirm-password-input"
                     label="Confirm password"
                     type="password"
                     name="confirmPassword"
@@ -153,6 +156,7 @@ export default function SignupPage() {
             )}
 
             <Button
+              data-testid="signup-button"
               type="submit"
               variant="primary"
               disabled={isLoading}

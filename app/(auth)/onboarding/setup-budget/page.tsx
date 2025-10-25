@@ -170,6 +170,7 @@ export default function SetupBudgetPage() {
                         <DollarSign className="h-4 w-4 text-slate-400" />
                       </div>
                       <Input
+                        data-testid={`budget-category-${category}`}
                         type="number"
                         name={`budget-${category.toLowerCase().replace(/\s+/g, '-')}`}
                         value={budgetAmounts[category] || 0}
@@ -201,6 +202,7 @@ export default function SetupBudgetPage() {
             </div>
 
             <Button
+              data-testid="create-budget-button"
               type="submit"
               variant="primary"
               disabled={isSaving}

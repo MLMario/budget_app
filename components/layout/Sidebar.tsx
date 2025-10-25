@@ -32,6 +32,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                data-testid={`nav-${item.name.toLowerCase()}`}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
                     ? 'bg-blue-50 text-blue-700 shadow-sm'
@@ -56,6 +57,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                data-testid={`nav-${item.name.toLowerCase()}`}
                 className={`flex flex-col items-center justify-center py-2 px-3 text-xs font-medium rounded-lg transition-colors ${
                   isActive
                     ? 'bg-blue-50 text-blue-700'

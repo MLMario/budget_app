@@ -127,6 +127,7 @@ export default function ConnectBankPage() {
                 </div>
 
                 <Button
+                  data-testid="skip-bank-connection"
                   onClick={handleSkip}
                   variant="ghost"
                   className="w-full text-slate-600 hover:text-slate-900 hover:bg-slate-50"
