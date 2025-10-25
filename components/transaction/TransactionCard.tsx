@@ -169,6 +169,25 @@ export function TransactionCard({
       {/* Expanded Details & Actions */}
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-gray-200 space-y-3" data-testid="transaction-details-modal">
+          {/* Close Button */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-700">Transaction Actions</h3>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(false);
+              }}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              data-testid="close-modal-button"
+              aria-label="Close transaction details"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
           {/* Notes Section */}
           {transaction.notes && (
             <div className="text-sm text-gray-700">
