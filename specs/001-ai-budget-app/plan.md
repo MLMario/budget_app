@@ -194,6 +194,319 @@ budget_app/
 
 **Structure Decision**: Web monolith pattern selected based on constitution principle III (Mixed Approach to Cross-Platform Architecture). Current priority is web-only; mobile support is medium priority. Clean `/services` layer enables future API extraction in ~1-2 weeks when mobile is needed. Supabase provides both backend infrastructure (PostgreSQL, Auth, Storage) and real-time capabilities, eliminating need for separate backend project.
 
+### Architecture Layers
+
+The application follows a strict 4-layer architecture pattern to maintain clean separation between client/server boundaries:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Client Components (app/**/*.tsx with 'use client')         │
+│ - React state, forms, interactivity                        │
+│ - CANNOT import services directly (Next.js restriction)    │
+└────────────────────────┬────────────────────────────────────┘
+                         │ calls via 'use server' functions
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Server Actions Layer (app/actions/*.ts with 'use server')  │
+│ - Thin wrappers around service functions                   │
+│ - Bridge client/server boundary                            │
+│ - NO business logic (pass-through only)                    │
+└────────────────────────┬────────────────────────────────────┘
+                         │ calls
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Service Layer (services/*.ts - NO directives)              │
+│ - Business logic, calculations, workflows                  │
+│ - Server-side only (uses server.ts Supabase client)        │
+│ - Source of truth for all business rules                   │
+└────────────────────────┬────────────────────────────────────┘
+                         │ calls
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Data Layer (lib/supabase/server.ts)                        │
+│ - Database access via Supabase client                      │
+│ - Uses next/headers for cookies (server-only)              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key Architectural Rules**:
+1. **Client Components** → MUST use Server Actions, CANNOT import services directly
+2. **Server Actions** → MUST be thin wrappers (no business logic), import from services only
+3. **Services** → Business logic source of truth, server-side only
+4. **Data Layer** → Database access, server-side only
+
+**Server Actions Layer Structure**:
+```text
+app/actions/
+├── auth.ts              # Auth server actions (wraps auth.service)
+├── budget.ts            # Budget server actions (wraps budget.service)
+├── transaction.ts       # Transaction server actions (wraps transaction.service)
+└── plaid.ts             # Plaid server actions (wraps plaid.service)
+```
+
+**Why Server Actions**:
+- Next.js 14 enforces strict client/server boundaries
+- Client components cannot import code using `next/headers` (like Supabase server client)
+- Server Actions ('use server') bridge this boundary with type safety
+- Maintains clean architecture: UI → Actions → Services → Data
+
+**Rationale**: This prevents "You're importing a component that needs next/headers" errors and maintains clean separation between UI, transport, business logic, and data access layers.
+
+### Next.js Routing Patterns
+
+**Route Groups (folders in parentheses)**:
+
+Route groups `(name)` do NOT create URL segments. They are for organization and layout sharing only.
+
+**Examples**:
+```text
+app/
+  (dashboard)/          ← Route group (NO URL segment)
+    page.tsx            → Maps to / (root)
+    dashboard/          ← Creates /dashboard URL segment
+      page.tsx          → Maps to /dashboard ✅
+    settings/
+      page.tsx          → Maps to /settings ✅
+```
+
+**Common Mistake**:
+```text
+app/
+  page.tsx              → / (landing page)
+  (dashboard)/
+    page.tsx            → / (CONFLICT - also maps to root) ❌
+```
+
+**Correct Pattern for /dashboard Route**:
+```text
+app/
+  page.tsx                      → / (landing page)
+  (dashboard)/                  ← Layout wrapper, no URL
+    layout.tsx                  → Applies to /dashboard/*
+    dashboard/                  ← Creates URL segment
+      page.tsx                  → /dashboard ✅
+```
+
+**Rationale**: Understanding route groups prevents 404 errors and routing confusion. Route groups are for layout sharing and organization, not URL structure.
+
+## Coding Standards
+
+### Import/Export Patterns
+
+**UI Components** (components/**/*.tsx):
+- MUST use named exports: `export function Button({ ... }) { ... }`
+- NEVER use default exports for UI components
+- Enables multi-export pattern (e.g., Card, CardHeader, CardContent)
+- Better tree-shaking and IDE auto-complete
+
+**Correct Usage**:
+```typescript
+// Component file
+export function Button({ children, ...props }: ButtonProps) { ... }
+
+// Consumer file
+import { Button } from '@/components/ui/Button';  // ✅ Named import
+```
+
+**Incorrect Usage**:
+```typescript
+// Component file
+export default function Button({ ... }) { ... }  // ❌ Default export
+
+// Consumer file
+import Button from '@/components/ui/Button';     // ❌ Default import
+```
+
+**Pages** (app/**/**/page.tsx):
+- MUST use default exports: `export default function PageName() { ... }`
+- Required by Next.js App Router convention
+
+**Rationale**: Prevents "does not contain a default export" errors and React component rendering failures.
+
+---
+
+### Async/Await Patterns
+
+**Supabase Client Creation**:
+- `createClient()` from lib/supabase/server.ts is ASYNC
+- MUST always use `await`: `const supabase = await createClient()`
+- Forgetting `await` causes "supabase.from is not a function" errors
+
+**Service Function Pattern**:
+```typescript
+// ✅ Correct
+export async function myServiceFunction(userId: string): Promise<Result> {
+  try {
+    const supabase = await createClient();  // ⚠️ MUST have await
+
+    const { data, error } = await supabase
+      .from('my_table')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) return { data: null, error };
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in myServiceFunction:', error);
+    return { data: null, error: error.message };
+  }
+}
+```
+
+**Common Mistakes**:
+```typescript
+// ❌ Wrong - missing await
+const supabase = createClient();  // Returns Promise, not client
+
+// ❌ Wrong - no error handling
+export async function myFunction() {
+  const supabase = await createClient();
+  const { data } = await supabase.from('table').select();
+  return data;  // No error handling
+}
+```
+
+**Rationale**: Prevents runtime "is not a function" errors and ensures proper error handling.
+
+---
+
+### Session Type Patterns
+
+**Service Layer Returns**:
+- `getSession()` returns `User | null` (flat structure)
+- NOT `{ session: { user: User } }` (nested structure)
+
+**Correct Usage**:
+```typescript
+// ✅ Correct
+const session = await getSessionAction();
+if (session) {
+  const userId = session.id;
+  const email = session.email;
+}
+```
+
+**Incorrect Usage**:
+```typescript
+// ❌ Wrong - session.session doesn't exist
+const session = await getSessionAction();
+if (session.session?.user) {
+  const userId = session.session.user.id;
+}
+```
+
+**Rationale**: Prevents "Cannot read properties of undefined" errors. Session is returned directly as User object, not nested.
+
+---
+
+### React Hook Patterns
+
+**Side Effects**:
+- Use `useEffect` for async data fetching, NOT `useState` initializer
+- `useState` initializer runs synchronously, cannot be async
+
+**Correct Pattern**:
+```typescript
+// ✅ Correct
+const [data, setData] = useState<Data | null>(null);
+
+useEffect(() => {
+  async function fetchData() {
+    const result = await myServerAction();
+    setData(result);
+  }
+  fetchData();
+}, []);  // Dependency array
+```
+
+**Incorrect Pattern**:
+```typescript
+// ❌ Wrong - async code in useState initializer
+const [data, setData] = useState<Data | null>(() => {
+  async function fetchData() {
+    const result = await myServerAction();
+    setData(result);
+  }
+  fetchData();
+  return null;
+});
+```
+
+**Rationale**: Prevents React hook misuse and runtime errors. useState initializer must be synchronous.
+
+## Dependency Management
+
+### Required UI Dependencies
+
+The following dependencies are REQUIRED for UI components to function:
+
+**Core UI Utilities**:
+- `clsx` (^2.1.1) - Conditional className construction
+- `tailwind-merge` (^3.3.1) - Tailwind CSS class merging with conflict resolution
+
+**Verification Checklist**:
+- After creating any file with `import` statements, run `npm install` to verify packages exist
+- Before marking task complete, run `npm run build` to catch missing dependencies
+- Document required packages in file header comments for complex utilities
+
+**Example** (lib/utils/cn.ts):
+```typescript
+/**
+ * Class Name Utility
+ *
+ * Required packages:
+ * - clsx: npm install clsx
+ * - tailwind-merge: npm install tailwind-merge
+ */
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+```
+
+**Rationale**: Prevents "Module not found" errors during development by establishing clear dependency documentation patterns.
+
+## Implementation Validation Standards
+
+### Before Marking Task Complete
+
+Every task marked as complete MUST pass these validation checks:
+
+**1. Implementation Verification**:
+- File exists at path specified in task
+- All functions/components from specification are implemented
+- Function signatures match specification (parameters, return types)
+- Business logic implements specification requirements (not partial)
+- Error handling present (try/catch blocks)
+- Loading states implemented (for async operations)
+
+**2. Code Quality Verification**:
+- All imports resolve correctly (no "module not found")
+- Import/export patterns match (named vs default)
+- All async functions use `await` on async calls
+- Session types used correctly (`User | null`, not nested)
+- TypeScript compilation succeeds (`npm run build`)
+- ESLint passes (`npm run lint`)
+
+**3. Integration Verification**:
+- Component/function works with existing code
+- Page renders without console errors (`npm run dev`)
+- User flow completes successfully (manual test)
+- Database operations succeed (if applicable)
+- API calls succeed (if applicable)
+
+**4. Documentation Verification**:
+- tasks.md updated with [x] immediately after completion
+- Complex code has inline comments explaining "why"
+- New dependencies documented in package.json
+- Breaking changes documented in commit message
+
+**Validation Frequency**:
+- After EACH task (not batch validation)
+- Before marking task complete in tasks.md
+- Before committing code
+- Before requesting code review
+
+**Rationale**: Systematic validation prevents incomplete implementations, catches integration issues early, and maintains alignment between tasks.md and reality.
+
 ## Phase 0: Research & Technology Decisions
 
 **Objective**: Resolve all NEEDS CLARIFICATION items and document technology choices.

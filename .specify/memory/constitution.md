@@ -66,9 +66,47 @@ automated tests before production deployment.
 - Mock Plaid and Claude SDK for testing
 - All tests MUST pass before merge
 - Minimum 80% code coverage REQUIRED for business logic
+- Compilation MUST succeed before marking task complete (`npm run build`)
+- Static analysis MUST pass (ESLint, TypeScript strict mode)
+
+**Code Quality Gates**:
+
+1. **Pre-Commit Checks**:
+   - TypeScript compilation (`tsc --noEmit`)
+   - ESLint validation (`npm run lint`)
+   - All tests pass (`npm test`)
+   - No console.log in production code (use proper logging)
+
+2. **Import/Export Validation**:
+   - Named imports match named exports
+   - Default imports match default exports
+   - All imported packages exist in package.json
+   - No unused imports (ESLint catches)
+
+3. **Async/Await Validation**:
+   - All `createClient()` calls have `await`
+   - All async functions have try/catch
+   - All promises are handled (no floating promises)
+   - ESLint rules: `@typescript-eslint/no-floating-promises`
+
+**Recommended ESLint Config**:
+```json
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/require-await": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "import/no-default-export": ["error", {
+      "allow": ["*.config.js", "*.page.tsx", "**/app/**/layout.tsx"]
+    }]
+  }
+}
+```
 
 **Rationale**: Financial accuracy is critical. Tests prevent bugs that impact user
-finances and provide confidence during refactoring.
+finances and provide confidence during refactoring. Code quality gates catch errors
+before they reach runtime, reducing debugging time and improving developer experience.
 
 ### III. Mixed Approach to Cross-Platform Architecture
 
@@ -77,19 +115,54 @@ without full rewrite.
 
 **Current Architecture (Now - Web Monolith)**:
 - Next.js full-stack application
-- Server actions/API routes for backend
+- Server Actions for client/server bridge ('use server' directive)
+- Services for business logic (server-side only)
 - Single deployment target
 
 **Future-Ready Guardrails**:
 - Business logic MUST be in separate service layer (NOT in UI components)
-- Database access MUST use repository pattern/ORM
-- Clean separation REQUIRED: /services (logic) → /repositories (data) → /app (UI)
+- Database access MUST use repository pattern (lib/supabase/server.ts)
+- Clean separation REQUIRED: UI (app/) → Server Actions (app/actions/) → Services (services/) → Data (lib/)
 - TypeScript interfaces MUST define data contracts
+- Client components MUST use Server Actions, CANNOT import services directly
+- Server Actions MUST be thin wrappers with NO business logic
+
+**Coding Standards for Separation**:
+
+1. **Import Rules**:
+   - Client components → Import from `app/actions/*` only
+   - Server Actions → Import from `services/*` only
+   - Services → Import from `lib/*` and other services only
+   - Violation causes: "You're importing a component that needs next/headers"
+
+2. **Export Patterns**:
+   - UI components → Named exports (`export function ComponentName`)
+   - Pages → Default exports (`export default function PageName`)
+   - Services → Named exports (`export async function serviceName`)
+   - Server Actions → Named exports with 'use server' directive
+
+3. **Async Patterns**:
+   - `createClient()` is async → MUST use `await`
+   - Service functions MUST be async and return Promise
+   - All database operations MUST use await
+
+**Architecture Layers**:
+```
+Client Components ('use client')
+    ↓ calls
+Server Actions ('use server')
+    ↓ calls
+Services (business logic)
+    ↓ calls
+Data Layer (Supabase)
+```
 
 **Migration Path**: Service layer becomes API when mobile needed (~1-2 weeks refactor)
 
 **Rationale**: Mobile is medium priority. Thoughtful separation enables future mobile
-without current overhead of maintaining separate API infrastructure.
+without current overhead of maintaining separate API infrastructure. Coding standards
+prevent architectural violations at compile/runtime and maintain clean boundaries between
+layers.
 
 ### IV. Local Development & Testing
 
