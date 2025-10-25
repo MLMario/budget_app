@@ -49,7 +49,7 @@ export async function importTransactions(
   plaidTransactions: any[]
 ): Promise<ImportTransactionsResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     let imported = 0;
     let skipped = 0;
 
@@ -109,7 +109,7 @@ export async function getTransactionsByUser(
   }
 ) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     let query = supabase
       .from('transactions')
       .select('*')
@@ -147,12 +147,12 @@ export async function updateCategory(
   newCategory: string
 ): Promise<UpdateCategoryResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get the transaction to find old category and date
     const { data: transaction, error: fetchError } = await supabase
       .from('transactions')
-      .select('category, date')
+      .select('user_category_override, category_primary, date')
       .eq('id', transactionId)
       .eq('user_id', userId)
       .single();
@@ -164,15 +164,15 @@ export async function updateCategory(
       };
     }
 
-    const oldCategory = transaction.category;
+    const oldCategory = transaction.user_category_override || transaction.category_primary;
     const transactionDate = new Date(transaction.date);
     const month = transactionDate.getMonth() + 1;
     const year = transactionDate.getFullYear();
 
-    // Update the category
+    // Update the category (set user_category_override)
     const { error } = await supabase
       .from('transactions')
-      .update({ category: newCategory })
+      .update({ user_category_override: newCategory })
       .eq('id', transactionId)
       .eq('user_id', userId);
 
@@ -209,12 +209,12 @@ export async function addTag(
   tag: 'non-negotiable' | 'ignored'
 ): Promise<AddTagResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get transaction to find category and date for budget recalculation
     const { data: transaction, error: fetchError } = await supabase
       .from('transactions')
-      .select('category, date')
+      .select('category_primary, date')
       .eq('id', transactionId)
       .eq('user_id', userId)
       .single();
@@ -254,7 +254,7 @@ export async function addTag(
       const year = transactionDate.getFullYear();
 
       const { recalculateSpending } = await import('./budget.service');
-      await recalculateSpending(userId, month, year, [transaction.category]);
+      await recalculateSpending(userId, month, year, [transaction.category_primary]);
     }
 
     return { success: true, error: null };

@@ -29,7 +29,7 @@ Node.js 18+ / TypeScript 5.3+: Follow standard conventions
 
 ## Current project details and status
 
-When starting a new session familiarize your self with:
+Only when the user ask you familiarize your self with:
 
 1) Project Principles: C:\Users\mario\apps\budget_ai\budget_app\.specify\memory\constitution.md
 2) Project Specs: C:\Users\mario\apps\budget_ai\budget_app\specs\001-ai-budget-app\spec.md

@@ -192,6 +192,10 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 - [x] T080 [US2] Create quick action buttons in `components/transaction/QuickActions.tsx` (Recategorize, Non-negotiable, Ignore, Add Note)
 - [x] T081 [US2] Create transaction notes modal in `components/transaction/NotesModal.tsx` for adding/editing notes
 
+#### User Feedback System
+
+- [x] AddT001 [US2] Create Toast notification component in `components/ui/Toast.tsx` with success/error variants, auto-dismiss, and multiple toast queue support (required for user action feedback across all transaction operations)
+
 #### Pattern Learning
 
 - [x] ~~T082 [US2] Implement pattern detection in `services/transaction.service.ts` (detectMerchantPattern function~~ **(REMOVED)** - track merchant → category mappings)

@@ -21,7 +21,12 @@
       "Bash(npm run test:e2e:*)",
       "Bash(npx playwright install:*)",
       "Bash(cat:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(if [ -f .gitignore ])",
+      "Bash(then grep -q \"node_modules\" .gitignore)",
+      "Bash(else echo \"GITIGNORE_MISSING\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

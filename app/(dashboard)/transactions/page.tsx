@@ -16,8 +16,10 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { updateCategoryAction, addTagAction } from '@/app/actions/transaction';
 import { createBrowserClient } from '@supabase/ssr';
+import { useToast } from '@/lib/hooks/useToast';
 
 export default function TransactionsPage() {
+  const toast = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,13 +167,14 @@ export default function TransactionsPage() {
         );
         setShowCategorySelector(false);
         setSelectedTransactionId(null);
+        toast.success(`Transaction recategorized to ${category}`);
       } else {
         console.error('Failed to update category:', result.error);
-        alert('Failed to update category. Please try again.');
+        toast.error('Failed to update category. Please try again.');
       }
     } catch (error) {
       console.error('Error updating category:', error);
-      alert('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 
@@ -195,20 +198,22 @@ export default function TransactionsPage() {
             return t;
           })
         );
+        const tagLabel = tag === 'non-negotiable' ? 'non-negotiable' : 'ignored';
+        toast.success(`Tagged as ${tagLabel}`);
       } else {
         console.error('Failed to add tag:', result.error);
-        alert('Failed to add tag. Please try again.');
+        toast.error('Failed to add tag. Please try again.');
       }
     } catch (error) {
       console.error('Error adding tag:', error);
-      alert('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNote = (transactionId: string) => {
     // TODO: Implement notes modal (T081)
-    alert('Notes feature coming soon!');
+    console.log('Add note for transaction:', transactionId);
+    toast.info('Notes feature coming soon!');
   };
 
   if (isLoading) {
