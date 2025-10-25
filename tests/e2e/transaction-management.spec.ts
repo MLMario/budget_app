@@ -12,11 +12,14 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import { createTestTransactions } from './test-helpers';
+import { createClient } from '@supabase/supabase-js';
 
 test.describe('T072 - Transaction Management E2E Tests', () => {
   let page: Page;
   let testEmail: string;
   let testPassword: string;
+  let userId: string;
 
   test.beforeAll(async ({ browser }) => {
     // Generate unique test user credentials
@@ -50,8 +53,28 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
     // Wait for redirect to dashboard
     await page.waitForURL('/dashboard');
 
-    // Import test transactions via API or UI
-    // (In real implementation, this would use the transaction import flow)
+    // Get user ID from Supabase session
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { data: { user, session } } = await supabase.auth.signInWithPassword({
+      email: testEmail,
+      password: testPassword,
+    });
+
+    if (!user || !session) {
+      throw new Error('Failed to get user ID or session after signup');
+    }
+
+    userId = user.id;
+
+    // Seed test transactions with user's access token
+    await createTestTransactions(userId, session.access_token, 10);
+
+    // Reload the page to ensure transactions are fetched with fresh data
+    await page.reload();
   });
 
   test.afterAll(async () => {

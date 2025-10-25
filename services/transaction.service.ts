@@ -79,7 +79,9 @@ export async function importTransactions(
           date: plaidTx.date,
           merchant_name: plaidTx.merchant_name || plaidTx.name,
           amount: Math.abs(plaidTx.amount), // Plaid amounts are negative for debits
-          category: category,
+          category_primary: category,
+          category_detailed: category,
+          payment_channel: 'online',
           tag_non_negotiable: false,
           tag_ignored: false,
         });
@@ -123,7 +125,7 @@ export async function getTransactionsByUser(
     }
 
     if (filters?.category) {
-      query = query.eq('category', filters.category);
+      query = query.eq('category_primary', filters.category);
     }
 
     const { data, error } = await query;

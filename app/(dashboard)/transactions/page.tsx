@@ -14,7 +14,8 @@ import { TransactionFilters, TransactionFilter } from '@/components/transaction/
 import { CategorySelector } from '@/components/transaction/CategorySelector';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { getTransactionsByUserAction, updateCategoryAction, addTagAction } from '@/app/actions/transaction';
+import { updateCategoryAction, addTagAction } from '@/app/actions/transaction';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -27,11 +28,21 @@ export default function TransactionsPage() {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch user ID from session (simplified - in production would use proper auth)
+  // Fetch user ID from Supabase session
   useEffect(() => {
-    // TODO: Replace with actual session/auth logic
-    const mockUserId = '123e4567-e89b-12d3-a456-426614174000';
-    setUserId(mockUserId);
+    const fetchUser = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   // Fetch transactions on mount and when user ID is available
@@ -47,11 +58,30 @@ export default function TransactionsPage() {
 
     setIsLoading(true);
     try {
-      const result = await getTransactionsByUserAction(userId);
-      setTransactions(result || []);
-      setFilteredTransactions(result || []);
+      // Fetch transactions directly from client-side Supabase
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching transactions:', error);
+        setTransactions([]);
+        setFilteredTransactions([]);
+      } else {
+        setTransactions(data || []);
+        setFilteredTransactions(data || []);
+      }
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setTransactions([]);
+      setFilteredTransactions([]);
     } finally {
       setIsLoading(false);
     }
