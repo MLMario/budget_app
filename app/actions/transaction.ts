@@ -4,7 +4,8 @@ import {
   importTransactions,
   getTransactionsByUser,
   updateCategory,
-  addTag
+  addTag,
+  updateNotes
 } from '@/services/transaction.service'
 
 export async function importTransactionsAction(userId: string, bankConnectionId: string, plaidTransactions: any[]) {
@@ -21,4 +22,8 @@ export async function updateCategoryAction(userId: string, transactionId: string
 
 export async function addTagAction(userId: string, transactionId: string, tag: 'non-negotiable' | 'ignored') {
   return await addTag(userId, transactionId, tag)
+}
+
+export async function updateNotesAction(userId: string, transactionId: string, notes: string) {
+  return await updateNotes(userId, transactionId, notes)
 }

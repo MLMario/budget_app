@@ -14,7 +14,8 @@
       "Bash(npm cache clean:*)",
       "Bash(taskkill:*)",
       "Bash(docker logs:*)",
-      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)"
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

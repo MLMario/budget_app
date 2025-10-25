@@ -179,18 +179,18 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 #### Transaction UI Enhancements
 
-- [ ] T073 [US2] Create full transactions page in `app/(dashboard)/transactions/page.tsx` with list, filters, search, and quick actions
-- [ ] T074 [US2] Create transaction card component in `components/transaction/TransactionCard.tsx` with merchant, amount, category badge, date, and action buttons
-- [ ] T075 [US2] Create transaction filters component in `components/transaction/TransactionFilters.tsx` with date range, category, merchant, amount filters
-- [ ] T076 [US2] Create transaction search component in `components/transaction/TransactionSearch.tsx` with merchant name search
-- [ ] T077 [US2] Create category selector component in `components/transaction/CategorySelector.tsx` for recategorization dropdown
+- [x] T073 [US2] Create full transactions page in `app/(dashboard)/transactions/page.tsx` with list, filters, search, and quick actions
+- [x] T074 [US2] Create transaction card component in `components/transaction/TransactionCard.tsx` with merchant, amount, category badge, date, and action buttons
+- [x] T075 [US2] Create transaction filters component in `components/transaction/TransactionFilters.tsx` with date range, category, merchant, amount filters
+- [x] T076 [US2] Create transaction search component in `components/transaction/TransactionSearch.tsx` with merchant name search
+- [x] T077 [US2] Create category selector component in `components/transaction/CategorySelector.tsx` for recategorization dropdown
 
 #### Transaction Actions
 
-- [ ] T078 [US2] Add recategorization functionality to transaction service in `services/transaction.service.ts` (updateCategory function with budget recalculation trigger)
-- [ ] T079 [US2] Add tagging functionality to transaction service in `services/transaction.service.ts` (addTag function with mutual exclusivity validation)
-- [ ] T080 [US2] Create quick action buttons in `components/transaction/QuickActions.tsx` (Recategorize, Non-negotiable, Ignore, Add Note)
-- [ ] T081 [US2] Create transaction notes modal in `components/transaction/NotesModal.tsx` for adding/editing notes
+- [x] T078 [US2] Add recategorization functionality to transaction service in `services/transaction.service.ts` (updateCategory function with budget recalculation trigger)
+- [x] T079 [US2] Add tagging functionality to transaction service in `services/transaction.service.ts` (addTag function with mutual exclusivity validation)
+- [x] T080 [US2] Create quick action buttons in `components/transaction/QuickActions.tsx` (Recategorize, Non-negotiable, Ignore, Add Note)
+- [x] T081 [US2] Create transaction notes modal in `components/transaction/NotesModal.tsx` for adding/editing notes
 
 #### Pattern Learning
 

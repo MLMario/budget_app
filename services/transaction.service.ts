@@ -23,6 +23,8 @@ export interface ImportTransactionsResult {
 }
 
 export interface UpdateCategoryResult {
+  budgetRecalculated?: boolean;
+  affectedCategories?: string[];
   success: boolean;
   error: any;
 }
@@ -195,6 +197,49 @@ export async function addTag(
     return { success: true, error: null };
   } catch (error: any) {
     console.error('Error adding tag:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Add or update notes for a transaction (T081)
+ */
+export async function updateNotes(
+  userId: string,
+  transactionId: string,
+  notes: string
+): Promise<{ success: boolean; error: any }> {
+  try {
+    const supabase = await createClient();
+
+    // Verify transaction belongs to user
+    const { data: transaction, error: verifyError } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (verifyError || !transaction) {
+      return {
+        success: false,
+        error: verifyError || 'Transaction not found or Unauthorized',
+      };
+    }
+
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ notes })
+      .eq('id', transactionId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      return { success: false, error: updateError };
+    }
+
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error('Error updating notes:', error);
     return { success: false, error: error.message };
   }
 }
