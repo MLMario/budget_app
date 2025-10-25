@@ -168,12 +168,12 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 ### Tests for User Story 2 (Write FIRST - ensure they FAIL before implementation)
 
-- [ ] T067 [P] [US2] Unit test for recategorization in `tests/unit/transaction.service.test.ts` (update category, verify budget recalculation)
-- [ ] T068 [P] [US2] Unit test for tagging logic in `tests/unit/transaction.service.test.ts` (non-negotiable, ignored, mutual exclusivity)
-- [ ] T069 [P] [US2] Unit test for pattern learning in `tests/unit/transaction.service.test.ts` (detect merchant patterns, suggest auto-categorization)
-- [ ] T070 [P] [US2] Unit test for search and filter in `tests/unit/transaction.service.test.ts` (filter by date, category, merchant, amount)
-- [ ] T071 [US2] Integration test for transaction management flow in `tests/integration/transaction-management.test.ts` (recategorize → budget updates → tag → excluded from budget)
-- [ ] T072 [US2] E2E test for transaction actions in `tests/e2e/transaction-management.spec.ts` (recategorize from dashboard, tag, search, verify UI updates)
+- [x] T067 [P] [US2] Unit test for recategorization in `tests/unit/transaction.service.test.ts` (update category, verify budget recalculation)
+- [x] T068 [P] [US2] Unit test for tagging logic in `tests/unit/transaction.service.test.ts` (non-negotiable, ignored, mutual exclusivity)
+- [x] T069 [P] [US2] Unit test for pattern learning in `tests/unit/transaction.service.test.ts` (detect merchant patterns, suggest auto-categorization)
+- [x] T070 [P] [US2] Unit test for search and filter in `tests/unit/transaction.service.test.ts` (filter by date, category, merchant, amount)
+- [x] T071 [US2] Integration test for transaction management flow in `tests/integration/transaction-management.test.ts` (recategorize → budget updates → tag → excluded from budget)
+- [x] T072 [US2] E2E test for transaction actions in `tests/e2e/transaction-management.spec.ts` (recategorize from dashboard, tag, search, verify UI updates)
 
 ### Implementation for User Story 2
 
