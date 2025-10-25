@@ -6,11 +6,11 @@ import { LayoutDashboard, Receipt, PiggyBank, Sparkles, Target, Settings } from 
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Transactions', href: '/dashboard/transactions', icon: Receipt },
-  { name: 'Budgets', href: '/dashboard/budgets', icon: PiggyBank },
-  { name: 'AI Insights', href: '/dashboard/ai-insights', icon: Sparkles },
-  { name: 'Goals & Preferences', href: '/dashboard/goals', icon: Target },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Transactions', href: '/transactions', icon: Receipt },
+  { name: 'Budgets', href: '/budgets', icon: PiggyBank },
+  { name: 'AI Insights', href: '/ai-insights', icon: Sparkles },
+  { name: 'Goals & Preferences', href: '/goals', icon: Target },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export default function Sidebar() {

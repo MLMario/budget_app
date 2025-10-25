@@ -65,7 +65,7 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // This test should FAIL until T073-T077 (Transaction UI) are implemented
       // Navigate to transactions page
       await page.click('[data-testid="nav-transactions"]');
-      await page.waitForURL('/dashboard/transactions');
+      await page.waitForURL('/transactions');
 
       // Verify transactions are loaded
       const transactionCards = page.locator('[data-testid^="transaction-card-"]');

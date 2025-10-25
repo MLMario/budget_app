@@ -20,7 +20,8 @@
       "Bash(npx tsc:*)",
       "Bash(npm run test:e2e:*)",
       "Bash(npx playwright install:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npx playwright test:*)"
     ],
     "deny": [],
     "ask": []
