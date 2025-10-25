@@ -22,7 +22,7 @@ import {
   calculateSpending,
   createBudget,
 } from '@/services/budget.service';
-import { createClient } from '@/lib/supabase/server';
+import { createTestClient } from '@/lib/supabase/server';
 
 describe('T071 - Transaction Management Integration Flow', () => {
   let testUserId: string;
@@ -32,7 +32,7 @@ describe('T071 - Transaction Management Integration Flow', () => {
 
   beforeAll(async () => {
     // Setup test environment
-    supabase = await createClient();
+    supabase = createTestClient();
 
     // Create test user
     const { data: authData, error: authError } = await supabase.auth.signUp({

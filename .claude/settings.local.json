@@ -17,7 +17,10 @@
       "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
       "Bash(npm run build:*)",
       "Bash(npm test:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

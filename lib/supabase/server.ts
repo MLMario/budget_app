@@ -74,6 +74,32 @@ export function createAdminClient() {
 }
 
 /**
+ * Create a Supabase client for testing (bypasses Next.js cookies)
+ *
+ * This client is used in integration tests where Next.js request
+ * context is not available. It uses the anon key for RLS but
+ * doesn't rely on cookie-based session management.
+ *
+ * @returns Supabase client instance for testing
+ */
+export function createTestClient() {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // No-op for test client
+        },
+      },
+    }
+  )
+}
+
+/**
  * Type helper for Supabase server client
  */
 export type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>

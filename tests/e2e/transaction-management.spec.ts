@@ -23,8 +23,10 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
     testEmail = `test-e2e-tx-${Date.now()}@example.com`;
     testPassword = 'TestPassword123!';
 
-    // Create a new page for the test user
-    page = await browser.newPage();
+    // Create isolated browser context with fresh storage (no cookies)
+    // This prevents middleware from redirecting /signup to /dashboard
+    const context = await browser.newContext();
+    page = await context.newPage();
 
     // Sign up test user
     await page.goto('/signup');
@@ -52,8 +54,9 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
   });
 
   test.afterAll(async () => {
-    // Cleanup
+    // Cleanup: Close both page and context to ensure clean state
     await page.close();
+    await page.context().close();
   });
 
   test.describe('Transaction Recategorization from Dashboard', () => {

@@ -13,6 +13,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     trace: "on-first-retry",
+    storageState: undefined, // Ensure no storage persists between test runs
   },
 
   projects: [
