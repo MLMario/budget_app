@@ -1388,7 +1388,16 @@ supabase stop
 
 ## 6. Transaction Categorization Approach
 
-### Decision
+**UPDATE 2025-10-24**: The automatic merchant pattern learning feature has been **removed for MVP simplification**. The current implementation uses:
+- **Plaid `personal_finance_category`** for initial automatic categorization
+- **Manual user override** via UI (stored in `user_category_override` field)
+- **No automatic pattern learning** from user recategorizations
+
+The pattern learning infrastructure documented below can be re-added in future iterations without architectural changes. For now, users must manually recategorize each transaction independently.
+
+---
+
+### Decision (Original - Pattern Learning Removed)
 
 Use **Plaid's `personal_finance_category`** (PFC) as the primary categorization source with **user recategorization learning** stored in a `merchant_category_overrides` table, and **confidence-based fallback** to user patterns.
 

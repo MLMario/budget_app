@@ -1,6 +1,6 @@
 /**
  * Phase 4 / User Story 2: Transaction Management and Categorization Tests
- * Tasks: T067, T068, T069, T070
+ * Tasks: T067, T068, T070 (T069 removed - pattern learning eliminated)
  *
  * These tests are written FIRST before implementation (Test-First Development)
  * All tests should FAIL until corresponding service functions are implemented
@@ -12,8 +12,6 @@ import {
   addTag,
   getTransactionsByUser,
   importTransactions,
-  detectMerchantPattern,
-  getPatternSuggestions,
 } from '@/services/transaction.service';
 
 // Mock Supabase client
@@ -131,123 +129,7 @@ describe('Phase 4 - User Story 2: Transaction Management Tests', () => {
     });
   });
 
-  // T069: Unit tests for pattern learning
-  describe('T069 - Pattern Learning and Merchant Patterns', () => {
-    it('should detect merchant patterns from user recategorizations', async () => {
-      // This test should FAIL until T082 (pattern detection) is implemented
-      const merchantName = 'Local Coffee Shop';
-      const targetCategory = 'Entertainment';
-
-      // User recategorizes multiple transactions from same merchant
-      await updateCategory(mockUserId, 'tx-1', targetCategory);
-      await updateCategory(mockUserId, 'tx-2', targetCategory);
-      await updateCategory(mockUserId, 'tx-3', targetCategory);
-
-      // Import new transaction from same merchant
-      const plaidTransactions = [{
-        transaction_id: 'plaid-tx-new',
-        date: '2025-10-20',
-        merchant_name: merchantName,
-        amount: 6.50,
-        personal_finance_category: { primary: 'FOOD_AND_DRINK', detailed: 'COFFEE_SHOPS' },
-      }];
-
-      const result = await importTransactions(mockUserId, mockBankConnectionId, plaidTransactions);
-
-      // Should auto-apply learned category based on pattern
-      const transactions = await getTransactionsByUser(mockUserId);
-      const newTx = transactions.find(t => t.plaid_transaction_id === 'plaid-tx-new');
-      expect(newTx?.user_category_override).toBe(targetCategory);
-    });
-
-    it('should suggest auto-categorization after pattern detected', async () => {
-      // This test should FAIL until T083 (pattern suggestion) is implemented
-      const merchantName = 'Starbucks';
-      const targetCategory = 'Personal Care';
-
-      // User recategorizes 3 transactions from same merchant
-      await updateCategory(mockUserId, 'tx-1', targetCategory);
-      await updateCategory(mockUserId, 'tx-2', targetCategory);
-      await updateCategory(mockUserId, 'tx-3', targetCategory);
-
-      // Should create pattern suggestion
-      const patterns = await getPatternSuggestions(mockUserId);
-
-      expect(patterns).toContainEqual(
-        expect.objectContaining({
-          merchant: merchantName,
-          suggestedCategory: targetCategory,
-          confidence: expect.any(Number),
-          occurrences: expect.any(Number),
-        })
-      );
-    });
-
-    it('should apply learned patterns only for the specific user', async () => {
-      // This test should FAIL until T082 is implemented
-      const otherUserId = '999e4567-e89b-12d3-a456-426614174000';
-      const merchantName = 'Local Coffee Shop';
-      const targetCategory = 'Entertainment';
-
-      // User 1 creates pattern by recategorizing
-      await updateCategory(mockUserId, 'tx-1', targetCategory);
-      await updateCategory(mockUserId, 'tx-2', targetCategory);
-
-      // User 2 imports transaction from same merchant
-      const plaidTransactions = [{
-        transaction_id: 'plaid-tx-other',
-        date: '2025-10-20',
-        merchant_name: merchantName,
-        amount: 6.50,
-        personal_finance_category: { primary: 'FOOD_AND_DRINK', detailed: 'COFFEE_SHOPS' },
-      }];
-
-      await importTransactions(otherUserId, mockBankConnectionId, plaidTransactions);
-
-      // Should NOT apply User 1's pattern to User 2
-      const transactions = await getTransactionsByUser(otherUserId);
-      const newTx = transactions.find(t => t.plaid_transaction_id === 'plaid-tx-other');
-      expect(newTx?.user_category_override).toBeNull();
-    });
-
-    it('should detect patterns with minimum 2 occurrences', async () => {
-      // This test should FAIL until T082 is implemented
-      const merchantName = 'Coffee Shop';
-      const targetCategory = 'Entertainment';
-
-      // User recategorizes only 1 transaction
-      await updateCategory(mockUserId, 'tx-1', targetCategory);
-
-      // Should NOT create pattern with only 1 occurrence
-      const patterns = await getPatternSuggestions(mockUserId);
-      const coffeePattern = patterns.find(p => p.merchant === merchantName);
-      expect(coffeePattern).toBeUndefined();
-
-      // After 2nd recategorization
-      await updateCategory(mockUserId, 'tx-2', targetCategory);
-
-      // Should NOW create pattern
-      const patterns2 = await getPatternSuggestions(mockUserId);
-      const coffeePattern2 = patterns2.find(p => p.merchant === merchantName);
-      expect(coffeePattern2).toBeDefined();
-      expect(coffeePattern2?.occurrences).toBeGreaterThanOrEqual(2);
-    });
-
-    it('should provide confidence score based on pattern consistency', async () => {
-      // This test should FAIL until T082 is implemented
-      const merchantName = 'Starbucks';
-
-      // User categorizes 5 times consistently
-      for (let i = 0; i < 5; i++) {
-        await updateCategory(mockUserId, `tx-${i}`, 'Entertainment');
-      }
-
-      const patterns = await getPatternSuggestions(mockUserId);
-      const pattern = patterns.find(p => p.merchant === merchantName);
-
-      expect(pattern?.confidence).toBeGreaterThan(0.8); // High confidence for consistent pattern
-    });
-  });
+  // T069: REMOVED - Pattern learning tests removed (T082-T084 removed from spec)
 
   // T070: Unit tests for search and filter
   describe('T070 - Search and Filter Transactions', () => {

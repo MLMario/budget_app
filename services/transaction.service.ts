@@ -147,6 +147,27 @@ export async function updateCategory(
   try {
     const supabase = createClient();
 
+    // Get the transaction to find old category and date
+    const { data: transaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('category, date')
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !transaction) {
+      return {
+        success: false,
+        error: fetchError || 'Transaction not found or Unauthorized',
+      };
+    }
+
+    const oldCategory = transaction.category;
+    const transactionDate = new Date(transaction.date);
+    const month = transactionDate.getMonth() + 1;
+    const year = transactionDate.getFullYear();
+
+    // Update the category
     const { error } = await supabase
       .from('transactions')
       .update({ category: newCategory })
@@ -157,9 +178,23 @@ export async function updateCategory(
       return { success: false, error };
     }
 
-    // TODO: Trigger budget recalculation
+    // T085: Trigger budget recalculation for affected categories
+    const affectedCategories = [oldCategory, newCategory];
+    const { recalculateSpending } = await import('./budget.service');
 
-    return { success: true, error: null };
+    const recalcResult = await recalculateSpending(
+      userId,
+      month,
+      year,
+      affectedCategories
+    );
+
+    return {
+      success: true,
+      error: null,
+      budgetRecalculated: recalcResult.success,
+      affectedCategories: recalcResult.updatedCategories,
+    };
   } catch (error: any) {
     console.error('Error updating category:', error);
     return { success: false, error: error.message };
@@ -173,6 +208,21 @@ export async function addTag(
 ): Promise<AddTagResult> {
   try {
     const supabase = createClient();
+
+    // Get transaction to find category and date for budget recalculation
+    const { data: transaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('category, date')
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !transaction) {
+      return {
+        success: false,
+        error: fetchError || 'Transaction not found or Unauthorized',
+      };
+    }
 
     // Enforce mutual exclusivity
     const updates: any = {};
@@ -192,6 +242,17 @@ export async function addTag(
 
     if (error) {
       return { success: false, error };
+    }
+
+    // T085/T086: Trigger budget recalculation when ignored tag changes
+    // because ignored transactions are excluded from budget calculations
+    if (tag === 'ignored') {
+      const transactionDate = new Date(transaction.date);
+      const month = transactionDate.getMonth() + 1;
+      const year = transactionDate.getFullYear();
+
+      const { recalculateSpending } = await import('./budget.service');
+      await recalculateSpending(userId, month, year, [transaction.category]);
     }
 
     return { success: true, error: null };

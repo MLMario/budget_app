@@ -38,7 +38,7 @@ A user needs to review, categorize, and tag their transactions to ensure accurat
 
 1. **Given** new transactions appear on the dashboard, **When** the user views them, **Then** each transaction displays the merchant name, amount, auto-assigned category, and date
 2. **Given** a transaction is miscategorized, **When** the user clicks "Recategorize" and selects a new category, **Then** the transaction updates to the new category and the budget tracking reflects the change
-3. **Given** a user recategorizes multiple transactions from the same merchant, **When** the system detects the pattern, **Then** it prompts "Should future transactions from [Merchant] be [Category]?" and learns from the confirmation
+3. ~~**Given** a user recategorizes multiple transactions from the same merchant, **When** the system detects the pattern, **Then** it prompts "Should future transactions from [Merchant] be [Category]?" and learns from the confirmation~~ **(REMOVED - Simplification)**
 4. **Given** a transaction should not count toward budgets, **When** the user clicks "Ignore", **Then** the transaction is grayed out and excluded from all budget calculations
 5. **Given** a transaction represents non-negotiable spending, **When** the user clicks "Non-negotiable", **Then** the transaction displays a special badge and AI recommendations will respect this constraint
 6. **Given** a user wants to find specific transactions, **When** they use search and filters, **Then** they can filter by date range, category, merchant, or amount

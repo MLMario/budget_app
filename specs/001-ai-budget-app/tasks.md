@@ -162,7 +162,7 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 ## Phase 4: User Story 2 - Transaction Management and Categorization (Priority: P1)
 
-**Goal**: Enable users to view, recategorize, tag transactions (non-negotiable/ignored), search and filter, with AI learning from patterns
+**Goal**: Enable users to view, recategorize, tag transactions (non-negotiable/ignored), search and filter, with search and filter capabilities
 
 **Independent Test**: View transactions, recategorize multiple times, tag as non-negotiable/ignored, verify budget tracking updates, search/filter by category and date
 
@@ -194,16 +194,16 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 #### Pattern Learning
 
-- [ ] T082 [US2] Implement pattern detection in `services/transaction.service.ts` (detectMerchantPattern function - track merchant → category mappings)
-- [ ] T083 [US2] Create pattern suggestion prompt component in `components/transaction/PatternPrompt.tsx` ("Should future transactions from [Merchant] be [Category]?")
-- [ ] T084 [US2] Store learned patterns in database (create merchant_patterns table if needed, or use user_preferences JSONB field)
+- [x] ~~T082 [US2] Implement pattern detection in `services/transaction.service.ts` (detectMerchantPattern function~~ **(REMOVED)** - track merchant → category mappings)
+- [x] ~~T083 [US2] Create pattern suggestion prompt component in `components/transaction/PatternPrompt.tsx~~ **(REMOVED)**` ("Should future transactions from [Merchant] be [Category]?")
+- [x] ~~T084 [US2] Store learned patterns in database (create merchant_patterns table~~ **(REMOVED)** if needed, or use user_preferences JSONB field)
 
 #### Budget Recalculation
 
-- [ ] T085 [US2] Add real-time budget update logic in `services/budget.service.ts` (recalculateSpending function triggered on category changes)
-- [ ] T086 [US2] Add budget exclusion logic in `services/budget.service.ts` (ignore transactions tagged as "ignored" in spending calculations)
+- [x] T085 [US2] Add real-time budget update logic in `services/budget.service.ts` (recalculateSpending function triggered on category changes)
+- [x] T086 [US2] Add budget exclusion logic in `services/budget.service.ts` (ignore transactions tagged as "ignored" in spending calculations)
 
-**Checkpoint**: User Story 2 complete - users can manage transactions with recategorization, tagging, search/filter, and AI learns patterns
+**Checkpoint**: User Story 2 complete - users can manage transactions with recategorization, tagging, search/filter, search/filter implemented
 
 ---
 

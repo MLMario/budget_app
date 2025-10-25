@@ -244,3 +244,62 @@ export async function updateBudgetCategory(
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * T085: Recalculate spending for specific categories when transactions change
+ * This function is called when transaction categories are updated or tags are modified
+ */
+export async function recalculateSpending(
+  userId: string,
+  month: number,
+  year: number,
+  categories: string[]
+): Promise<{ success: boolean; updatedCategories: string[]; error: any }> {
+  try {
+    const supabase = await createClient();
+
+    // Get the budget for this month/year
+    const budget = await getBudgetByMonth(userId, month, year);
+
+    if (!budget) {
+      // No budget exists for this month, nothing to recalculate
+      return { success: true, updatedCategories: [], error: null };
+    }
+
+    const updatedCategories: string[] = [];
+
+    // Recalculate spending for each affected category
+    for (const categoryName of categories) {
+      const spending = await calculateSpending(userId, month, year, categoryName);
+
+      // Update the budget_categories table with new spending amount
+      const { error: updateError } = await supabase
+        .from('budget_categories')
+        .update({
+          spent_amount: spending,
+          updated_at: new Date().toISOString()
+        })
+        .eq('budget_id', budget.id)
+        .eq('category_name', categoryName);
+
+      if (!updateError) {
+        updatedCategories.push(categoryName);
+      } else {
+        console.error(`Error updating spending for ${categoryName}:`, updateError);
+      }
+    }
+
+    return {
+      success: true,
+      updatedCategories,
+      error: null
+    };
+  } catch (error: any) {
+    console.error('Error recalculating spending:', error);
+    return {
+      success: false,
+      updatedCategories: [],
+      error: error.message
+    };
+  }
+}

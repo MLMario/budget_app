@@ -539,9 +539,9 @@ Every task marked as complete MUST pass these validation checks:
    - Output: Document local setup steps and migration best practices
 
 6. **Transaction Categorization Approach**
-   - Decision: Use Plaid's `personal_finance_category` vs custom ML model
-   - Research: Accuracy of Plaid categorization, customization options
-   - Output: Document categorization logic and learning mechanism
+   - Decision: Use Plaid's `personal_finance_category` for initial categorization
+   - Research: Accuracy of Plaid categorization, customization options via user overrides
+   - Output: Document categorization logic and manual override workflow
 
 ### Research Output
 
