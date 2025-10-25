@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { getSessionAction } from '@/app/actions/auth';
 import { getBudgetByMonthAction, calculateSpendingAction } from '@/app/actions/budget';
+import { AlertCircle, CheckCircle, Lightbulb, Info, AlertTriangle } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
 
 interface Alert {
   id: string;
@@ -99,88 +101,147 @@ export default function AlertsPanel() {
   const getAlertStyles = (type: Alert['type']) => {
     switch (type) {
       case 'error':
-        return 'bg-red-50 border-red-200 text-red-800';
+        return 'bg-red-50 border-red-200';
       case 'warning':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+        return 'bg-yellow-50 border-yellow-200';
       case 'info':
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return 'bg-blue-50 border-blue-200';
       case 'success':
-        return 'bg-green-50 border-green-200 text-green-800';
+        return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200';
       default:
-        return 'bg-gray-50 border-gray-200 text-gray-800';
+        return 'bg-slate-50 border-slate-200';
     }
   };
 
   const getAlertIcon = (type: Alert['type']) => {
     switch (type) {
       case 'error':
-        return '🚨';
+        return AlertCircle;
       case 'warning':
-        return '⚠️';
+        return AlertTriangle;
       case 'info':
-        return 'ℹ️';
+        return Info;
       case 'success':
-        return '✅';
+        return CheckCircle;
       default:
-        return '📌';
+        return Info;
     }
   };
 
+  const getAlertIconColor = (type: Alert['type']) => {
+    switch (type) {
+      case 'error':
+        return 'text-red-600';
+      case 'warning':
+        return 'text-yellow-600';
+      case 'info':
+        return 'text-blue-600';
+      case 'success':
+        return 'text-white';
+      default:
+        return 'text-slate-600';
+    }
+  };
+
+  const getAlertTextColor = (type: Alert['type']) => {
+    switch (type) {
+      case 'error':
+        return 'text-red-900';
+      case 'warning':
+        return 'text-yellow-900';
+      case 'info':
+        return 'text-blue-900';
+      case 'success':
+        return 'text-emerald-900';
+      default:
+        return 'text-slate-900';
+    }
+  };
+
+  const quickTips = [
+    'Tag recurring bills as "non-negotiable" to track essential expenses',
+    'Review your spending weekly to stay on track',
+    'Use AI Insights for personalized recommendations',
+  ];
+
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Alerts</h2>
-        <div className="animate-pulse space-y-3">
-          <div className="h-20 bg-gray-200 rounded"></div>
-          <div className="h-20 bg-gray-200 rounded"></div>
+      <div className="sticky top-8 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-24 bg-slate-200 rounded-xl mb-6"></div>
+          <div className="h-40 bg-slate-200 rounded-xl"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="sticky top-8">
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Alerts</h2>
+    <div className="sticky top-8 space-y-6">
+      {/* Alerts Section */}
+      <div>
+        <h3 className="text-slate-900 font-semibold mb-4">Alerts</h3>
 
         {alerts.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500 text-sm">No alerts at this time</p>
-            <p className="text-xs text-gray-400 mt-2">You're all caught up!</p>
-          </div>
+          <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-emerald-900 font-medium mb-1">No alerts at this time</p>
+                <p className="text-sm text-emerald-700">You're all caught up!</p>
+              </div>
+            </div>
+          </Card>
         ) : (
           <div className="space-y-3">
-            {alerts.map((alert) => (
-              <div
-                key={alert.id}
-                className={`rounded-lg border p-3 ${getAlertStyles(alert.type)}`}
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-xl">{getAlertIcon(alert.type)}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm">{alert.title}</h3>
-                    <p className="text-xs mt-1">{alert.message}</p>
+            {alerts.map((alert) => {
+              const Icon = getAlertIcon(alert.type);
+              const bgClass = alert.type === 'success' ? 'bg-emerald-500' :
+                             alert.type === 'error' ? 'bg-red-500' :
+                             alert.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+              return (
+                <Card
+                  key={alert.id}
+                  className={`p-4 ${getAlertStyles(alert.type)}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-8 h-8 ${bgClass} rounded-full flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-5 h-5 ${getAlertIconColor(alert.type)}`} />
+                    </div>
+                    <div>
+                      <p className={`font-medium mb-1 ${getAlertTextColor(alert.type)}`}>
+                        {alert.title}
+                      </p>
+                      <p className={`text-sm ${getAlertTextColor(alert.type)}`}>
+                        {alert.message}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         )}
+      </div>
 
-        {/* Quick Tips Section */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Tips</h3>
-          <div className="space-y-2">
-            <div className="text-xs text-gray-600">
-              💡 Tag recurring bills as "non-negotiable" to track essential expenses
-            </div>
-            <div className="text-xs text-gray-600">
-              💡 Review your spending weekly to stay on track
-            </div>
-            <div className="text-xs text-gray-600">
-              💡 Use AI Insights for personalized recommendations
-            </div>
-          </div>
+      {/* Quick Tips Section */}
+      <div>
+        <h3 className="text-slate-900 font-semibold mb-4">Quick Tips</h3>
+        <div className="space-y-3">
+          {quickTips.map((tip, index) => (
+            <Card
+              key={index}
+              className="p-4 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors duration-200 cursor-pointer"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-900" />
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed">{tip}</p>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     </div>

@@ -6,6 +6,30 @@ import { suggestBudgetAmountsAction, createBudgetAction } from '@/app/actions/bu
 import { getSessionAction } from '@/app/actions/auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import {
+  Coffee,
+  Car,
+  ShoppingBag,
+  Home,
+  Zap,
+  Film,
+  Heart,
+  ShoppingCart,
+  DollarSign,
+  Loader2,
+  PiggyBank
+} from 'lucide-react';
+
+const CATEGORY_ICONS: Record<string, any> = {
+  'Dining & Coffee': Coffee,
+  'Transportation': Car,
+  'Shopping': ShoppingBag,
+  'Housing': Home,
+  'Utilities': Zap,
+  'Entertainment': Film,
+  'Healthcare': Heart,
+  'Groceries': ShoppingCart,
+};
 
 const COMMON_CATEGORIES = [
   'Dining & Coffee',
@@ -94,70 +118,105 @@ export default function SetupBudgetPage() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
+          <p className="text-slate-600">Loading suggestions...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Set Your Budget
-        </h1>
-        <p className="text-gray-600 mb-6">
-          We've suggested budget amounts based on your recent spending. You can adjust these amounts or enter your own.
-        </p>
-
-        {error && (
-          <div className="mb-6 rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-800">{error}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg mb-4">
+            <PiggyBank className="w-8 h-8 text-white" />
           </div>
-        )}
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            Set Your Budget
+          </h1>
+          <p className="text-slate-600 max-w-2xl mx-auto">
+            We've suggested budget amounts based on your recent spending. You can adjust these amounts or enter your own.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 mb-6">
-            {COMMON_CATEGORIES.map((category) => (
-              <div
-                key={category}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-              >
-                <label className="font-medium text-gray-900 flex-1">
-                  {category}
-                </label>
-                <div className="w-32">
-                  <Input
-                    type="number"
-                    name={`budget-${category.toLowerCase().replace(/\s+/g, '-')}`}
-                    value={budgetAmounts[category] || 0}
-                    onChange={(e) => handleAmountChange(category, e.target.value)}
-                    min="0"
-                    step="10"
-                    className="text-right"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-semibold text-gray-900">
-                Total Monthly Budget
-              </span>
-              <span className="text-2xl font-bold text-blue-600">
-                ${Object.values(budgetAmounts).reduce((sum, amount) => sum + amount, 0).toFixed(2)}
-              </span>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+          {error && (
+            <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+              <p className="text-sm text-red-800">{error}</p>
             </div>
-          </div>
+          )}
 
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSaving}
-            className="w-full"
-          >
-            {isSaving ? 'Creating budget...' : 'Create Budget'}
-          </Button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-3 mb-6">
+              {COMMON_CATEGORIES.map((category) => {
+                const Icon = CATEGORY_ICONS[category];
+                return (
+                  <div
+                    key={category}
+                    className="flex items-center gap-4 p-4 border border-slate-200 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-200"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <label className="font-medium text-slate-900 flex-1">
+                      {category}
+                    </label>
+                    <div className="relative w-36">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSign className="h-4 w-4 text-slate-400" />
+                      </div>
+                      <Input
+                        type="number"
+                        name={`budget-${category.toLowerCase().replace(/\s+/g, '-')}`}
+                        value={budgetAmounts[category] || 0}
+                        onChange={(e) => handleAmountChange(category, e.target.value)}
+                        min="0"
+                        step="10"
+                        className="text-right pl-8"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-lg font-semibold text-blue-900">
+                    Total Monthly Budget
+                  </span>
+                </div>
+                <span className="text-3xl font-bold text-blue-600">
+                  ${Object.values(budgetAmounts).reduce((sum, amount) => sum + amount, 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSaving}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating budget...
+                </>
+              ) : (
+                'Create Budget'
+              )}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
