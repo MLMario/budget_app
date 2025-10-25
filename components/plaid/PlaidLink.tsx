@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 
 interface PlaidLinkProps {
   userId: string;

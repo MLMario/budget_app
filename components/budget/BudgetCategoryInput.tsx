@@ -1,6 +1,6 @@
 'use client';
 
-import Input from '../ui/Input';
+import { Input } from '../ui/Input';
 
 interface BudgetCategoryInputProps {
   category: string;

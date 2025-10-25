@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { suggestBudgetAmountsAction, createBudgetAction } from '@/app/actions/budget';
 import { getSessionAction } from '@/app/actions/auth';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 const COMMON_CATEGORIES = [
   'Dining & Coffee',

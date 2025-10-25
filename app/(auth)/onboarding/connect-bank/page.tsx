@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PlaidLink from '@/components/plaid/PlaidLink';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { exchangePublicTokenAction } from '@/app/actions/plaid';
 import { getSessionAction } from '@/app/actions/auth';
 

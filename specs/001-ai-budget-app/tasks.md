@@ -114,47 +114,47 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 ### Tests for User Story 1 (Write FIRST - ensure they FAIL before implementation)
 
-- [ ] T043 [P] [US1] Unit test for signUp function in `tests/unit/auth.service.test.ts` (valid email/password, duplicate email, weak password cases)
-- [ ] T044 [P] [US1] Unit test for Plaid link token creation in `tests/unit/plaid.service.test.ts`
-- [ ] T045 [P] [US1] Unit test for transaction import and categorization in `tests/unit/transaction.service.test.ts` (30 days import, deduplication, auto-categorization)
-- [ ] T046 [P] [US1] Unit test for budget suggestion logic in `tests/unit/budget.service.test.ts` (calculate average spending per category)
-- [ ] T047 [P] [US1] Integration test for onboarding flow in `tests/integration/onboarding.test.ts` (signup → Plaid connect → transaction import → budget creation)
-- [ ] T048 [US1] E2E test for complete onboarding in `tests/e2e/onboarding.spec.ts` (signup form → Plaid Link UI → dashboard with budget in < 5 min)
+- [x] T043 [P] [US1] Unit test for signUp function in `tests/unit/auth.service.test.ts` (valid email/password, duplicate email, weak password cases)
+- [x] T044 [P] [US1] Unit test for Plaid link token creation in `tests/unit/plaid.service.test.ts`
+- [x] T045 [P] [US1] Unit test for transaction import and categorization in `tests/unit/transaction.service.test.ts` (30 days import, deduplication, auto-categorization)
+- [x] T046 [P] [US1] Unit test for budget suggestion logic in `tests/unit/budget.service.test.ts` (calculate average spending per category)
+- [x] T047 [P] [US1] Integration test for onboarding flow in `tests/integration/onboarding.test.ts` (signup → Plaid connect → transaction import → budget creation)
+- [x] T048 [US1] E2E test for complete onboarding in `tests/e2e/onboarding.spec.ts` (signup form → Plaid Link UI → dashboard with budget in < 5 min)
 
 ### Implementation for User Story 1
 
 #### Authentication & Onboarding UI
 
-- [ ] T049 [P] [US1] Create signup page in `app/(auth)/signup/page.tsx` with email/password form and validation
-- [ ] T050 [P] [US1] Create login page in `app/(auth)/login/page.tsx` with email/password form and "Forgot password" link
-- [ ] T051 [P] [US1] Create password reset page in `app/(auth)/reset-password/page.tsx`
-- [ ] T052 [US1] Create onboarding layout in `app/(auth)/onboarding/layout.tsx` with multi-step progress indicator
+- [x] T049 [P] [US1] Create signup page in `app/(auth)/signup/page.tsx` with email/password form and validation
+- [x] T050 [P] [US1] Create login page in `app/(auth)/login/page.tsx` with email/password form and "Forgot password" link
+- [x] T051 [P] [US1] Create password reset page in `app/(auth)/reset-password/page.tsx`
+- [x] T052 [US1] Create onboarding layout in `app/(auth)/onboarding/layout.tsx` with multi-step progress indicator
 
 #### Plaid Integration
 
-- [ ] T053 [US1] Implement Plaid service in `services/plaid.service.ts` (createLinkToken, exchangePublicToken, syncTransactions, handleWebhook functions)
-- [ ] T054 [US1] Create Plaid Link component in `components/plaid/PlaidLink.tsx` using Plaid Link SDK for bank connection UI
-- [ ] T055 [US1] Create bank connection step in `app/(auth)/onboarding/connect-bank/page.tsx` with Plaid Link component and "Skip for now" option
-- [ ] T056 [US1] Create Plaid webhook endpoint in `app/api/plaid/webhook/route.ts` to handle transaction updates (verify webhook signature, process TRANSACTIONS_UPDATE events)
+- [x] T053 [US1] Implement Plaid service in `services/plaid.service.ts` (createLinkToken, exchangePublicToken, syncTransactions, handleWebhook functions)
+- [x] T054 [US1] Create Plaid Link component in `components/plaid/PlaidLink.tsx` using Plaid Link SDK for bank connection UI
+- [x] T055 [US1] Create bank connection step in `app/(auth)/onboarding/connect-bank/page.tsx` with Plaid Link component and "Skip for now" option
+- [x] T056 [US1] Create Plaid webhook endpoint in `app/api/plaid/webhook/route.ts` to handle transaction updates (verify webhook signature, process TRANSACTIONS_UPDATE events)
 
 #### Transaction Management
 
-- [ ] T057 [US1] Implement transaction service in `services/transaction.service.ts` (importTransactions, categorizeTransaction, getTransactionsByUser, updateCategory, addTag functions)
-- [ ] T058 [US1] Create transaction categorization logic in `services/transaction.service.ts` (map Plaid personal_finance_category to app categories, learn from user overrides)
-- [ ] T059 [US1] Create transaction list component in `components/transaction/TransactionList.tsx` with merchant, amount, category, date display
+- [x] T057 [US1] Implement transaction service in `services/transaction.service.ts` (importTransactions, categorizeTransaction, getTransactionsByUser, updateCategory, addTag functions)
+- [x] T058 [US1] Create transaction categorization logic in `services/transaction.service.ts` (map Plaid personal_finance_category to app categories, learn from user overrides)
+- [x] T059 [US1] Create transaction list component in `components/transaction/TransactionList.tsx` with merchant, amount, category, date display
 
 #### Budget Setup
 
-- [ ] T060 [US1] Implement budget service in `services/budget.service.ts` (createBudget, getBudgetByMonth, updateBudgetCategory, suggestBudgetAmounts, calculateSpending functions)
-- [ ] T061 [US1] Create budget suggestion logic in `services/budget.service.ts` (calculate average spending per category from last 30 days)
-- [ ] T062 [US1] Create budget setup step in `app/(auth)/onboarding/setup-budget/page.tsx` with suggested amounts and manual override inputs
-- [ ] T063 [US1] Create budget category input component in `components/budget/BudgetCategoryInput.tsx` with category name, suggested amount, and user input
+- [x] T060 [US1] Implement budget service in `services/budget.service.ts` (createBudget, getBudgetByMonth, updateBudgetCategory, suggestBudgetAmounts, calculateSpending functions)
+- [x] T061 [US1] Create budget suggestion logic in `services/budget.service.ts` (calculate average spending per category from last 30 days)
+- [x] T062 [US1] Create budget setup step in `app/(auth)/onboarding/setup-budget/page.tsx` with suggested amounts and manual override inputs
+- [x] T063 [US1] Create budget category input component in `components/budget/BudgetCategoryInput.tsx` with category name, suggested amount, and user input
 
 #### Dashboard (Basic Version for Onboarding)
 
-- [ ] T064 [US1] Create dashboard layout in `app/(dashboard)/layout.tsx` with 3-column grid (left sidebar nav, main content, right alerts panel)
-- [ ] T065 [US1] Create dashboard page in `app/(dashboard)/page.tsx` showing welcome message, recent transactions, and budget summary
-- [ ] T066 [US1] Create sidebar navigation in `components/layout/Sidebar.tsx` with links to Dashboard, Transactions, Budgets, AI Insights, Goals, Settings
+- [x] T064 [US1] Create dashboard layout in `app/(dashboard)/layout.tsx` with 3-column grid (left sidebar nav, main content, right alerts panel)
+- [x] T065 [US1] Create dashboard page in `app/(dashboard)/page.tsx` showing welcome message, recent transactions, and budget summary
+- [x] T066 [US1] Create sidebar navigation in `components/layout/Sidebar.tsx` with links to Dashboard, Transactions, Budgets, AI Insights, Goals, Settings
 
 **Checkpoint**: User Story 1 complete - users can sign up, connect bank, see categorized transactions, and create first budget within 5 minutes
 

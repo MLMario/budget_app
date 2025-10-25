@@ -8,7 +8,11 @@
       "Bash(docker exec:*)",
       "Bash(head:*)",
       "Bash(timeout 15 npm run dev:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(ls:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []
