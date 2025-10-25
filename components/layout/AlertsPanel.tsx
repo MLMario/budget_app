@@ -20,12 +20,12 @@ export default function AlertsPanel() {
     async function loadAlerts() {
       try {
         const session = await getSessionAction();
-        if (!session.session?.user) {
+        if (!session) {
           setIsLoading(false);
           return;
         }
 
-        const userId = session.session.user.id;
+        const userId = session.id;
         const now = new Date();
         const month = now.getMonth() + 1;
         const year = now.getFullYear();

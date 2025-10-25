@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PlaidLink from '@/components/plaid/PlaidLink';
 import { Button } from '@/components/ui/Button';
@@ -14,15 +14,15 @@ export default function ConnectBankPage() {
   const [userId, setUserId] = useState<string | null>(null);
 
   // Get user ID on mount
-  useState(() => {
+  useEffect(() => {
     async function fetchUserId() {
       const session = await getSessionAction();
-      if (session.session?.user) {
-        setUserId(session.session.user.id);
+      if (session) {
+        setUserId(session.id);
       }
     }
     fetchUserId();
-  });
+  }, []);
 
   const handlePlaidSuccess = async (publicToken: string, metadata: any) => {
     setIsProcessing(true);

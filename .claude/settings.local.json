@@ -12,7 +12,8 @@
       "Bash(ls:*)",
       "Bash(npm outdated:*)",
       "Bash(npm cache clean:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(docker logs:*)"
     ],
     "deny": [],
     "ask": []

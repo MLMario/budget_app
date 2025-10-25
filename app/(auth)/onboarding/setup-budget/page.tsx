@@ -29,12 +29,12 @@ export default function SetupBudgetPage() {
   useEffect(() => {
     async function initialize() {
       const session = await getSessionAction();
-      if (!session.session?.user) {
+      if (!session) {
         router.push('/login');
         return;
       }
 
-      const uid = session.session.user.id;
+      const uid = session.id;
       setUserId(uid);
 
       // Get suggested amounts

@@ -18,13 +18,13 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadDashboard() {
       const session = await getSessionAction();
-      if (!session.session?.user) {
+      if (!session) {
         router.push('/login');
         return;
       }
 
-      const userId = session.session.user.id;
-      setUserName(session.session.user.email?.split('@')[0] || 'User');
+      const userId = session.id;
+      setUserName(session.email?.split('@')[0] || 'User');
 
       // Get current month budget
       const now = new Date();

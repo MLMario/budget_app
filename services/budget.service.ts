@@ -18,7 +18,7 @@ export interface UpdateBudgetCategoryResult {
 
 export async function suggestBudgetAmounts(userId: string): Promise<Record<string, number>> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get transactions from last 30 days
     const thirtyDaysAgo = new Date();
@@ -78,7 +78,7 @@ export async function createBudget(
   budgetData: BudgetData
 ): Promise<CreateBudgetResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Check if budget already exists for this month/year
     const { data: existing } = await supabase
@@ -141,7 +141,7 @@ export async function getBudgetByMonth(
   year: number
 ) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data: budget, error } = await supabase
       .from('budgets')
@@ -169,7 +169,7 @@ export async function calculateSpending(
   category?: string
 ): Promise<number> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get start and end dates for the month
     const startDate = new Date(year, month - 1, 1);
@@ -214,7 +214,7 @@ export async function updateBudgetCategory(
       };
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Verify budget belongs to user
     const { data: budget } = await supabase

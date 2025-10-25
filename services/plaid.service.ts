@@ -85,7 +85,7 @@ export async function exchangePublicToken(
     }
 
     // Store bank connection in database
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Encrypt access token using Supabase Vault (pgsodium)
     const { data: bankConnection, error: dbError } = await supabase
@@ -134,7 +134,7 @@ export async function syncTransactions(
   bankConnectionId: string
 ): Promise<SyncTransactionsResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get bank connection with decrypted access token
     const { data: bankConnection, error: fetchError } = await supabase
@@ -229,7 +229,7 @@ export async function handleWebhook(
       const itemId = payload.item_id;
 
       // Find bank connection by item_id
-      const supabase = createClient();
+      const supabase = await createClient();
       const { data: bankConnection } = await supabase
         .from('bank_connections')
         .select('*')
@@ -247,7 +247,7 @@ export async function handleWebhook(
 
       if (errorCode === 'ITEM_LOGIN_REQUIRED') {
         // Update connection status to needs_reauth
-        const supabase = createClient();
+        const supabase = await createClient();
         await supabase
           .from('bank_connections')
           .update({ connection_status: 'needs_reauth' })
