@@ -106,10 +106,12 @@ export default function TransactionsPage() {
 
     // Apply filters
     if (filters.startDate) {
-      result = result.filter((t) => new Date(t.date) >= new Date(filters.startDate!));
+      // Compare date strings directly (YYYY-MM-DD format) to avoid timezone issues
+      result = result.filter((t) => t.date >= filters.startDate!);
     }
     if (filters.endDate) {
-      result = result.filter((t) => new Date(t.date) <= new Date(filters.endDate!));
+      // Compare date strings directly - inclusive of end date
+      result = result.filter((t) => t.date <= filters.endDate!);
     }
     if (filters.category) {
       result = result.filter((t: any) => {

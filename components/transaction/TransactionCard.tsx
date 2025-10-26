@@ -45,7 +45,13 @@ const formatCurrency = (amount: number) => {
 };
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
+  // Parse date string directly without timezone conversion
+  // dateString is in YYYY-MM-DD format from database
+  const [year, month, day] = dateString.split('-').map(Number);
+
+  // Create date in local timezone (not UTC) to avoid off-by-one errors
+  const date = new Date(year, month - 1, day);
+
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
