@@ -45,6 +45,11 @@ Example: category vs category_primary mismatch caught in Fix #3
 ALL interactive elements need data-testid attributes
 Test setup MUST seed realistic data (all required fields)
 Pattern: data-testid="action-element" format
+Always wait for React re-renders after state-changing actions
+Prefer waitForFunction over setTimeout for deterministic tests
+Test isolation is critical - clear state between tests
+Playwright error snapshots capture state AFTER errors, not during
+Disabled buttons should never be clicked - test logic needs revision
 
 ## Recent Changes
 
