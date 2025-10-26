@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSessionAction } from '@/app/actions/auth';
 import { getBudgetByMonthAction, calculateSpendingAction } from '@/app/actions/budget';
-import { getTransactionsByUserAction } from '@/app/actions/transaction';
 import { Receipt, TrendingUp, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -47,9 +47,24 @@ export default function DashboardPage() {
         setTotalSpent(spent);
       }
 
-      // Get recent transactions
-      const transactions = await getTransactionsByUserAction(userId);
-      setRecentTransactions(transactions.slice(0, 10));
+      // Get recent transactions with category joins
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select(`
+          *,
+          app_category:categories!app_category_id(id, name, display_name),
+          user_category:categories!user_category_override_id(id, name, display_name)
+        `)
+        .eq('user_id', userId)
+        .order('date', { ascending: false })
+        .limit(10);
+
+      setRecentTransactions(transactions || []);
 
       setIsLoading(false);
     }
@@ -209,7 +224,11 @@ export default function DashboardPage() {
                   <p className="font-semibold text-slate-900">
                     {formatCurrency(Math.abs(tx.amount))}
                   </p>
-                  <p className="text-xs text-slate-500">{tx.category || 'Uncategorized'}</p>
+                  <p className="text-xs text-slate-500">
+                    {(tx as any).user_category?.display_name ||
+                     (tx as any).app_category?.display_name ||
+                     'Uncategorized'}
+                  </p>
                 </div>
               </div>
             ))}

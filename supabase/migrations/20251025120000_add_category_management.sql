@@ -293,7 +293,17 @@ ALTER TABLE public.budget_categories
 -- Step 10: Add index for budget_categories
 CREATE INDEX IF NOT EXISTS idx_budget_categories_category ON public.budget_categories(category_id);
 
--- Step 11: Keep old TEXT columns for backward compatibility (optional)
+-- Step 11: Make category_name nullable (it's now deprecated in favor of category_id)
+ALTER TABLE public.budget_categories
+  ALTER COLUMN category_name DROP NOT NULL;
+
+-- Step 12: Drop old unique constraints on category_name (deprecated)
+ALTER TABLE public.budget_categories
+  DROP CONSTRAINT IF EXISTS budget_categories_budget_id_category_name_key;
+
+DROP INDEX IF EXISTS idx_budget_categories_budget_category;
+
+-- Step 13: Keep old TEXT columns for backward compatibility (optional)
 -- Rename them to indicate they're deprecated
 DO $$
 BEGIN

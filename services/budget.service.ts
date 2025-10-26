@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 export interface BudgetData {
   month: number;
   year: number;
-  categories: Record<string, number>;
+  categories: Array<{ category_id: string; budgeted_amount: number }>; // UPDATED: Use category_id FK
 }
 
 export interface CreateBudgetResult {
@@ -16,60 +16,70 @@ export interface UpdateBudgetCategoryResult {
   error: any;
 }
 
-export async function suggestBudgetAmounts(userId: string): Promise<Record<string, number>> {
+export async function suggestBudgetAmounts(userId: string): Promise<Array<{ category_id: string; category_name: string; suggested_amount: number }>> {
   try {
     const supabase = await createClient();
 
-    // Get transactions from last 30 days
+    // Get all active categories
+    const { data: categories, error: catError } = await supabase
+      .from('categories')
+      .select('id, name, display_name')
+      .eq('is_active', true)
+      .order('display_order');
+
+    if (catError || !categories) {
+      return [];
+    }
+
+    // Get transactions from last 30 days with category info
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: transactions, error } = await supabase
+    const { data: transactions } = await supabase
       .from('transactions')
-      .select('category, amount')
+      .select('app_category_id, user_category_override_id, amount')
       .eq('user_id', userId)
       .eq('tag_ignored', false)
       .gte('date', thirtyDaysAgo.toISOString().split('T')[0]);
 
-    if (error || !transactions || transactions.length === 0) {
-      // Return default suggestions if no transactions
-      return {
-        'Dining & Coffee': 200,
-        'Transportation': 150,
-        'Shopping': 300,
-        'Housing': 1500,
-        'Utilities': 200,
-        'Entertainment': 150,
-        'Healthcare': 100,
-        'Groceries': 400,
-      };
+    // Calculate spending per category
+    const categoryTotals: Record<string, number> = {};
+
+    if (transactions && transactions.length > 0) {
+      transactions.forEach((tx: any) => {
+        const categoryId = tx.user_category_override_id || tx.app_category_id;
+        if (categoryId) {
+          categoryTotals[categoryId] = (categoryTotals[categoryId] || 0) + tx.amount;
+        }
+      });
     }
 
-    // Calculate average spending per category
-    const categoryTotals: Record<string, number> = {};
-    const categoryCounts: Record<string, number> = {};
+    // Build suggestions for all categories
+    const suggestions = categories.map((cat: any) => {
+      const total = categoryTotals[cat.id] || 0;
 
-    transactions.forEach((tx) => {
-      if (!categoryTotals[tx.category]) {
-        categoryTotals[tx.category] = 0;
-        categoryCounts[tx.category] = 0;
-      }
-      categoryTotals[tx.category] += tx.amount;
-      categoryCounts[tx.category]++;
-    });
+      // If no spending history, use defaults based on category
+      let defaultAmount = 100;
+      if (cat.name === 'groceries') defaultAmount = 400;
+      else if (cat.name === 'housing') defaultAmount = 1500;
+      else if (cat.name === 'dining_out') defaultAmount = 200;
+      else if (cat.name === 'transportation') defaultAmount = 150;
+      else if (cat.name === 'utilities') defaultAmount = 200;
+      else if (cat.name === 'shopping') defaultAmount = 300;
 
-    // Round to nearest $10
-    const suggestions: Record<string, number> = {};
-    Object.keys(categoryTotals).forEach((category) => {
-      const total = categoryTotals[category];
-      const rounded = Math.ceil(total / 10) * 10;
-      suggestions[category] = rounded;
+      const suggested = total > 0 ? Math.ceil(total / 10) * 10 : defaultAmount;
+
+      return {
+        category_id: cat.id,
+        category_name: cat.display_name,
+        suggested_amount: suggested,
+      };
     });
 
     return suggestions;
   } catch (error: any) {
     console.error('Error suggesting budget amounts:', error);
-    return {};
+    return [];
   }
 }
 
@@ -77,11 +87,21 @@ export async function createBudget(
   userId: string,
   budgetData: BudgetData
 ): Promise<CreateBudgetResult> {
+  console.log('[createBudget] Called with:', {
+    userId,
+    month: budgetData.month,
+    year: budgetData.year,
+    categoriesCount: budgetData.categories.length,
+    categories: budgetData.categories
+  });
+
   try {
     const supabase = await createClient();
 
+    console.log('[createBudget] Checking for existing budget...');
+
     // Check if budget already exists for this month/year
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('budgets')
       .select('id')
       .eq('user_id', userId)
@@ -89,12 +109,23 @@ export async function createBudget(
       .eq('year', budgetData.year)
       .single();
 
+    console.log('[createBudget] Existing check result:', { existing, existingError });
+
+    // PGRST116 means no rows found, which is expected for new budgets
+    if (existingError && existingError.code !== 'PGRST116') {
+      console.error('[createBudget] Error checking existing budget:', existingError);
+      return { budget_id: null, error: existingError?.message || 'Failed to check existing budget' };
+    }
+
     if (existing) {
+      console.log('[createBudget] Budget already exists, aborting');
       return {
         budget_id: null,
         error: 'Budget already exists for this month',
       };
     }
+
+    console.log('[createBudget] No existing budget found, proceeding with creation...');
 
     // Create budget
     const { data: budget, error: budgetError } = await supabase
@@ -108,26 +139,33 @@ export async function createBudget(
       .single();
 
     if (budgetError || !budget) {
-      return { budget_id: null, error: budgetError };
+      console.error('[createBudget] Budget creation failed:', budgetError);
+      return { budget_id: null, error: budgetError?.message || 'Failed to create budget' };
     }
 
-    // Create budget categories
-    const categoryInserts = Object.entries(budgetData.categories).map(
-      ([category, amount]) => ({
+    console.log('[createBudget] Budget created successfully:', budget.id);
+
+    // Create budget categories using category_id FK
+    const categoryInserts = budgetData.categories.map(
+      (cat) => ({
         budget_id: budget.id,
-        category_name: category,
-        budgeted_amount: amount,
+        category_id: cat.category_id,
+        budgeted_amount: cat.budgeted_amount,
       })
     );
+
+    console.log('[createBudget] Inserting categories:', categoryInserts);
 
     const { error: categoriesError } = await supabase
       .from('budget_categories')
       .insert(categoryInserts);
 
     if (categoriesError) {
-      return { budget_id: null, error: categoriesError };
+      console.error('[createBudget] Categories insert failed:', categoriesError);
+      return { budget_id: null, error: categoriesError?.message || 'Failed to create budget categories' };
     }
 
+    console.log('[createBudget] SUCCESS! Budget created with ID:', budget.id);
     return { budget_id: budget.id, error: null };
   } catch (error: any) {
     console.error('Error creating budget:', error);
@@ -166,7 +204,7 @@ export async function calculateSpending(
   userId: string,
   month: number,
   year: number,
-  category?: string
+  categoryId?: string
 ): Promise<number> {
   try {
     const supabase = await createClient();
@@ -175,25 +213,29 @@ export async function calculateSpending(
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
 
-    let query = supabase
+    const query = supabase
       .from('transactions')
-      .select('amount')
+      .select('amount, app_category_id, user_category_override_id')
       .eq('user_id', userId)
       .eq('tag_ignored', false)
       .gte('date', startDate.toISOString().split('T')[0])
       .lte('date', endDate.toISOString().split('T')[0]);
 
-    if (category) {
-      query = query.eq('category', category);
-    }
+    const { data } = await query;
 
-    const { data, error } = await query;
-
-    if (error || !data) {
+    if (!data) {
       return 0;
     }
 
-    return data.reduce((sum, tx) => sum + tx.amount, 0);
+    // Filter by category if specified (check both app_category_id and user_category_override_id)
+    const filteredData = categoryId
+      ? data.filter((tx: any) => {
+          const effectiveCategoryId = tx.user_category_override_id || tx.app_category_id;
+          return effectiveCategoryId === categoryId;
+        })
+      : data;
+
+    return filteredData.reduce((sum: number, tx: any) => sum + tx.amount, 0);
   } catch (error: any) {
     console.error('Error calculating spending:', error);
     return 0;
@@ -248,54 +290,28 @@ export async function updateBudgetCategory(
 /**
  * T085: Recalculate spending for specific categories when transactions change
  * This function is called when transaction categories are updated or tags are modified
+ *
+ * NOTE: With new schema, spent_amount is NOT stored - it's calculated on-demand via
+ * calculate_budget_utilization() function. This function is kept for backward compatibility
+ * but is essentially a no-op now.
  */
 export async function recalculateSpending(
-  userId: string,
-  month: number,
-  year: number,
-  categories: string[]
+  _userId: string,
+  _month: number,
+  _year: number,
+  categoryIds: string[]
 ): Promise<{ success: boolean; updatedCategories: string[]; error: any }> {
   try {
-    const supabase = await createClient();
-
-    // Get the budget for this month/year
-    const budget = await getBudgetByMonth(userId, month, year);
-
-    if (!budget) {
-      // No budget exists for this month, nothing to recalculate
-      return { success: true, updatedCategories: [], error: null };
-    }
-
-    const updatedCategories: string[] = [];
-
-    // Recalculate spending for each affected category
-    for (const categoryName of categories) {
-      const spending = await calculateSpending(userId, month, year, categoryName);
-
-      // Update the budget_categories table with new spending amount
-      const { error: updateError } = await supabase
-        .from('budget_categories')
-        .update({
-          spent_amount: spending,
-          updated_at: new Date().toISOString()
-        })
-        .eq('budget_id', budget.id)
-        .eq('category_name', categoryName);
-
-      if (!updateError) {
-        updatedCategories.push(categoryName);
-      } else {
-        console.error(`Error updating spending for ${categoryName}:`, updateError);
-      }
-    }
+    // With new schema, spending is calculated dynamically via calculate_budget_utilization()
+    // database function. No need to store spent_amount in budget_categories table.
+    // This function is kept for backward compatibility but doesn't actually update anything.
 
     return {
       success: true,
-      updatedCategories,
+      updatedCategories: categoryIds,
       error: null
     };
   } catch (error: any) {
-    console.error('Error recalculating spending:', error);
     return {
       success: false,
       updatedCategories: [],

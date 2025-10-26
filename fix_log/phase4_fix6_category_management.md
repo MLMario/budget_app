@@ -2,7 +2,7 @@
 
 **Date:** 2025-10-25
 **Issue:** Critical data model gap - no category management between Plaid taxonomy and app budget categories
-**Status:** ✅ **MIGRATION CREATED - READY TO APPLY**
+**Status:** ✅ **COMPLETE - ALL PHASES IMPLEMENTED**
 
 ---
 
@@ -253,57 +253,6 @@ Budget Category → category_id: <uuid-for-dining_out>
 - Includes category distribution report
 - Identifies unmapped Plaid categories
 
----
-
-## How to Apply Migration
-
-### **Option 1: Supabase CLI** (Recommended)
-
-```bash
-cd C:\Users\mario\apps\budget_ai\budget_app
-
-# Reset database (applies all migrations)
-supabase db reset
-
-# OR apply only new migrations
-supabase migration up
-```
-
-### **Option 2: Manual SQL Execution**
-
-```bash
-# Connect to database
-psql -h localhost -p 54322 -U postgres -d postgres
-
-# Run migration
-\i supabase/migrations/20251025120000_add_category_management.sql
-
-# Validate
-\i supabase/migrations/validate_20251025_migration.sql
-```
-
-### **Option 3: Supabase Studio UI**
-
-1. Open http://localhost:54323
-2. Navigate to SQL Editor
-3. Copy/paste migration SQL
-4. Execute
-5. Verify in Table Editor
-
----
-
-## Validation Checklist
-
-After applying the migration, verify:
-
-- [ ] 12 categories exist in `categories` table
-- [ ] 43 mappings exist in `plaid_category_mappings` table
-- [ ] All transactions have `app_category_id` NOT NULL
-- [ ] All budget_categories have `category_id` NOT NULL
-- [ ] Budget utilization calculation returns correct spent amounts
-- [ ] No orphaned data (all FKs point to valid categories)
-- [ ] RLS policies work correctly
-- [ ] Indexes exist on all FK columns
 
 **Quick validation:**
 ```bash
@@ -519,8 +468,8 @@ After applying migration and code changes:
 
 - ✅ **Phase 1 Complete:** New tables created (categories, plaid_category_mappings)
 - ✅ **Phase 2 Complete:** Existing tables updated (transactions, budget_categories)
-- ⏳ **Phase 3 Pending:** Service layer updates (requires code changes)
-- ⏳ **Phase 4 Pending:** UI updates (requires code changes)
+- ✅ **Phase 3 Complete:** Service layer updates (all service functions now use category FKs)
+- ✅ **Phase 4 Complete:** UI updates (all components now use category IDs)
 
 ---
 
@@ -554,12 +503,90 @@ When complete, the following should be true:
 **Total:** 6-8 hours
 
 - ✅ Migration creation: 2 hours (COMPLETE)
-- ⏳ Service layer updates: 2-3 hours
-- ⏳ UI updates: 1-2 hours
-- ⏳ Testing & validation: 1 hour
+- ✅ Migration application: 1 hour (COMPLETE)
+- ✅ Service layer updates: 2-3 hours (COMPLETE)
+- ✅ UI updates: 1-2 hours (COMPLETE)
+- ⏳ Testing & validation: Ongoing
 
 ---
 
-**STATUS:** ✅ **MIGRATION READY - PHASE 1 & 2 COMPLETE**
+## Phase 3 Implementation Summary (Service Layer)
 
-**Next Action:** Apply migration using Supabase CLI or manual SQL execution, then proceed with service layer updates (Phase 3).
+**Files Updated:**
+
+1. **types/index.ts**
+   - Added `Category` interface
+   - Updated `Transaction` interface with `app_category_id` and `user_category_override_id` FKs
+   - Updated `BudgetCategory` interface with `category_id` FK
+   - Marked deprecated TEXT fields
+
+2. **services/category.service.ts** (NEW)
+   - `getCategories()` - Fetch all active categories
+   - `getCategoryById()` - Get single category by ID
+   - `getCategoryByName()` - Get category by internal name
+   - `getCategoriesForSelect()` - Format for dropdowns
+
+3. **services/budget.service.ts**
+   - Updated `suggestBudgetAmounts()` to return array with `category_id`
+   - Updated `createBudget()` to accept array of `{category_id, budgeted_amount}`
+   - Updated `calculateSpending()` to use `categoryId` (UUID) parameter
+   - All budget operations now use category foreign keys
+
+4. **services/transaction.service.ts**
+   - Removed hardcoded `CATEGORY_MAP`
+   - Removed `categorizeTransaction()` function (replaced by database trigger)
+   - Updated `updateCategory()` to accept `newCategoryId` (UUID)
+   - Transaction import now relies on database trigger for auto-categorization
+
+**Key Changes:**
+- ✅ All service functions now use UUID category references instead of TEXT
+- ✅ Database trigger handles auto-categorization (no service layer mapping needed)
+- ✅ Backward compatibility maintained through deprecated columns
+
+---
+
+## Phase 4 Implementation Summary (UI Layer)
+
+**Files Created:**
+
+1. **app/actions/category.ts** (NEW)
+   - Server actions: `getCategoriesAction`, `getCategoryByIdAction`, etc.
+   - Wraps category service for client-side use
+
+**Files Updated:**
+
+1. **app/actions/transaction.ts**
+   - Updated `updateCategoryAction` to accept `newCategoryId: string` (UUID)
+
+2. **components/transaction/CategorySelector.tsx**
+   - Now fetches categories from database via `getCategoriesAction()`
+   - Props changed to `currentCategoryId`, `currentCategoryName`
+   - `onSelect` callback returns both `categoryId` and `categoryName`
+   - Removed hardcoded `CATEGORIES` array
+
+3. **app/(auth)/onboarding/setup-budget/page.tsx**
+   - Added `categories: Category[]` state
+   - Fetches categories on component mount
+   - `budgetAmounts` now uses category IDs as keys
+   - Icon mapping updated to use internal names (`dining_out`, etc.)
+   - Form submission converts Record to array of `{category_id, budgeted_amount}`
+   - Matches suggestions by ID or name for backward compatibility
+
+4. **app/(dashboard)/transactions/page.tsx**
+   - Updated `handleCategorySelect` to accept `(categoryId, categoryName)`
+   - Passes `categoryId` to `updateCategoryAction`
+   - Refreshes transactions after category update
+   - Simplified CategorySelector props
+
+**Key Changes:**
+- ✅ All UI components now use database-driven categories
+- ✅ Category selection uses UUIDs as foreign keys
+- ✅ No hardcoded category arrays in UI code
+- ✅ Loading states for category fetching
+- ✅ Type-safe category references throughout
+
+---
+
+**STATUS:** ✅ **ALL PHASES COMPLETE - READY FOR TESTING**
+
+**Next Action:** End-to-end testing of budget creation, transaction import, and budget tracking accuracy.

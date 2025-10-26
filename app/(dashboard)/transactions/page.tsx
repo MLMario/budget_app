@@ -66,9 +66,13 @@ export default function TransactionsPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      const { data, error } = await supabase
+      const { data, error} = await supabase
         .from('transactions')
-        .select('*')
+        .select(`
+          *,
+          app_category:categories!app_category_id(id, name, display_name),
+          user_category:categories!user_category_override_id(id, name, display_name)
+        `)
         .eq('user_id', userId)
         .order('date', { ascending: false });
 
@@ -108,10 +112,11 @@ export default function TransactionsPage() {
       result = result.filter((t) => new Date(t.date) <= new Date(filters.endDate!));
     }
     if (filters.category) {
-      result = result.filter(
-        (t) =>
-          (t.user_category_override || t.category_primary) === filters.category
-      );
+      result = result.filter((t: any) => {
+        // Get effective category ID (user override takes precedence)
+        const effectiveCategoryId = t.user_category_override_id || t.app_category_id;
+        return effectiveCategoryId === filters.category;
+      });
     }
     if (filters.minAmount !== undefined) {
       result = result.filter((t) => t.amount >= filters.minAmount!);
@@ -150,24 +155,18 @@ export default function TransactionsPage() {
     setShowCategorySelector(true);
   };
 
-  const handleCategorySelect = async (category: string) => {
+  const handleCategorySelect = async (categoryId: string, categoryName: string) => {
     if (!userId || !selectedTransactionId) return;
 
     try {
-      const result = await updateCategoryAction(userId, selectedTransactionId, category);
+      const result = await updateCategoryAction(userId, selectedTransactionId, categoryId);
 
       if (result.success) {
-        // Update local state
-        setTransactions((prev) =>
-          prev.map((t) =>
-            t.id === selectedTransactionId
-              ? { ...t, user_category_override: category }
-              : t
-          )
-        );
+        // Refresh transactions to get updated data
+        await fetchTransactions();
         setShowCategorySelector(false);
         setSelectedTransactionId(null);
-        toast.success(`Transaction recategorized to ${category}`);
+        toast.success(`Transaction recategorized to ${categoryName}`);
       } else {
         console.error('Failed to update category:', result.error);
         toast.error('Failed to update category. Please try again.');
@@ -265,10 +264,6 @@ export default function TransactionsPage() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="max-w-md w-full m-4">
                   <CategorySelector
-                    currentCategory={
-                      transactions.find((t) => t.id === selectedTransactionId)
-                        ?.user_category_override || undefined
-                    }
                     onSelect={handleCategorySelect}
                     onCancel={() => {
                       setShowCategorySelector(false);

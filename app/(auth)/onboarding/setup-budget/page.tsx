@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { suggestBudgetAmountsAction, createBudgetAction } from '@/app/actions/budget';
+import { getCategoriesAction } from '@/app/actions/category';
 import { getSessionAction } from '@/app/actions/auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import type { Category } from '@/types';
 import {
   Coffee,
   Car,
@@ -17,34 +19,35 @@ import {
   ShoppingCart,
   DollarSign,
   Loader2,
-  PiggyBank
+  PiggyBank,
+  Utensils,
+  GraduationCap,
+  Plane,
+  Sparkles
 } from 'lucide-react';
 
+// UPDATED: Icon mapping now uses category internal names
 const CATEGORY_ICONS: Record<string, any> = {
-  'Dining & Coffee': Coffee,
-  'Transportation': Car,
-  'Shopping': ShoppingBag,
-  'Housing': Home,
-  'Utilities': Zap,
-  'Entertainment': Film,
-  'Healthcare': Heart,
-  'Groceries': ShoppingCart,
+  'dining_out': Coffee,
+  'transportation': Car,
+  'shopping': ShoppingBag,
+  'housing': Home,
+  'utilities': Zap,
+  'entertainment': Film,
+  'healthcare': Heart,
+  'groceries': ShoppingCart,
+  'personal_care': Sparkles,
+  'education': GraduationCap,
+  'travel': Plane,
+  'other': Utensils,
 };
 
-const COMMON_CATEGORIES = [
-  'Dining & Coffee',
-  'Transportation',
-  'Shopping',
-  'Housing',
-  'Utilities',
-  'Entertainment',
-  'Healthcare',
-  'Groceries',
-];
+// REMOVED: COMMON_CATEGORIES - now fetched from database
 
 export default function SetupBudgetPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [budgetAmounts, setBudgetAmounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,16 +64,27 @@ export default function SetupBudgetPage() {
       const uid = session.id;
       setUserId(uid);
 
-      // Get suggested amounts
-      const suggestions = await suggestBudgetAmountsAction(uid);
+      // Fetch categories from database
+      const categoriesResult = await getCategoriesAction();
+      if (categoriesResult.categories) {
+        setCategories(categoriesResult.categories);
 
-      // Initialize with suggestions or defaults
-      const initialAmounts: Record<string, number> = {};
-      COMMON_CATEGORIES.forEach((category) => {
-        initialAmounts[category] = suggestions[category] || 0;
-      });
+        // Get suggested amounts
+        const suggestions = await suggestBudgetAmountsAction(uid);
 
-      setBudgetAmounts(initialAmounts);
+        // Initialize with suggestions or defaults using category IDs
+        const initialAmounts: Record<string, number> = {};
+        categoriesResult.categories.forEach((category) => {
+          // Try to match suggestion by category ID or name
+          const suggestion = suggestions.find(
+            (s: any) => s.category_id === category.id || s.category_name === category.display_name
+          );
+          initialAmounts[category.id] = suggestion?.suggested_amount || 0;
+        });
+
+        setBudgetAmounts(initialAmounts);
+      }
+
       setIsLoading(false);
     }
 
@@ -98,10 +112,17 @@ export default function SetupBudgetPage() {
 
     try {
       const now = new Date();
+
+      // Convert budgetAmounts Record to array format for createBudgetAction
+      const categoriesArray = Object.entries(budgetAmounts).map(([categoryId, amount]) => ({
+        category_id: categoryId,
+        budgeted_amount: amount,
+      }));
+
       const result = await createBudgetAction(userId, {
         month: now.getMonth() + 1,
         year: now.getFullYear(),
-        categories: budgetAmounts,
+        categories: categoriesArray,
       });
 
       if (result.error) {
@@ -152,29 +173,29 @@ export default function SetupBudgetPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-3 mb-6">
-              {COMMON_CATEGORIES.map((category) => {
-                const Icon = CATEGORY_ICONS[category];
+              {categories.map((category) => {
+                const Icon = CATEGORY_ICONS[category.name] || DollarSign;
                 return (
                   <div
-                    key={category}
+                    key={category.id}
                     className="flex items-center gap-4 p-4 border border-slate-200 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-200"
                   >
                     <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Icon className="w-5 h-5 text-slate-600" />
                     </div>
                     <label className="font-medium text-slate-900 flex-1">
-                      {category}
+                      {category.display_name}
                     </label>
                     <div className="relative w-36">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <DollarSign className="h-4 w-4 text-slate-400" />
                       </div>
                       <Input
-                        data-testid={`budget-category-${category}`}
+                        data-testid={`budget-category-${category.name}`}
                         type="number"
-                        name={`budget-${category.toLowerCase().replace(/\s+/g, '-')}`}
-                        value={budgetAmounts[category] || 0}
-                        onChange={(e) => handleAmountChange(category, e.target.value)}
+                        name={`budget-${category.name}`}
+                        value={budgetAmounts[category.id] || 0}
+                        onChange={(e) => handleAmountChange(category.id, e.target.value)}
                         min="0"
                         step="10"
                         className="text-right pl-8"

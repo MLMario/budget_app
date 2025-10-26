@@ -7,9 +7,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/Button';
+import { getCategoriesAction } from '@/app/actions/category';
+import type { Category } from '@/types';
 
 export interface TransactionFilter {
   startDate?: string;
@@ -29,27 +31,6 @@ export interface TransactionFiltersProps {
   className?: string;
 }
 
-const CATEGORIES = [
-  'All Categories',
-  'Dining & Coffee',
-  'Transportation',
-  'Shopping',
-  'Housing',
-  'Entertainment',
-  'Healthcare',
-  'Travel',
-  'Personal Care',
-  'Fees',
-  'Transfer',
-  'Income',
-  'Groceries',
-  'Bills & Utilities',
-  'Education',
-  'Gifts & Donations',
-  'Savings',
-  'Uncategorized',
-];
-
 export function TransactionFilters({
   onApplyFilters,
   onClearFilters,
@@ -58,6 +39,18 @@ export function TransactionFilters({
   className,
 }: TransactionFiltersProps) {
   const [filters, setFilters] = useState<TransactionFilter>({});
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Fetch categories from database
+  useEffect(() => {
+    async function fetchCategories() {
+      const result = await getCategoriesAction();
+      if (result.categories) {
+        setCategories(result.categories);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   const handleApply = () => {
     onApplyFilters(filters);
@@ -168,19 +161,22 @@ export function TransactionFilters({
               Category
             </label>
             <select
-              value={filters.category || 'All Categories'}
+              value={filters.category || ''}
               onChange={(e) =>
                 updateFilter(
                   'category',
-                  e.target.value === 'All Categories' ? undefined : e.target.value
+                  e.target.value === '' ? undefined : e.target.value
                 )
               }
               className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
               data-testid="filter-category-dropdown"
             >
-              {CATEGORIES.map((category) => (
-                <option key={category} value={category} data-testid={`filter-category-option-${category}`}>
-                  {category}
+              <option value="" data-testid="filter-category-option-all">
+                All Categories
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id} data-testid={`filter-category-option-${category.name}`}>
+                  {category.display_name}
                 </option>
               ))}
             </select>

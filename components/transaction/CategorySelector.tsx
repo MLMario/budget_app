@@ -2,43 +2,28 @@
  * CategorySelector Component
  *
  * T077: Dropdown component for recategorizing transactions
- * Displays all available budget categories with visual styling
+ * Displays all available budget categories from database with visual styling
+ * UPDATED: Now fetches categories from database instead of hardcoded list
  */
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/Button';
+import { getCategoriesAction } from '@/app/actions/category';
+import type { Category } from '@/types';
 
 export interface CategorySelectorProps {
-  currentCategory?: string;
-  onSelect: (category: string) => void;
+  currentCategoryId?: string; // UPDATED: Use category ID instead of name
+  currentCategoryName?: string; // For display only
+  onSelect: (categoryId: string, categoryName: string) => void; // UPDATED: Return both ID and name
   onCancel?: () => void;
   isOpen?: boolean;
   className?: string;
 }
 
-// Standard app categories matching the category mapping
-const CATEGORIES = [
-  'Dining & Coffee',
-  'Transportation',
-  'Shopping',
-  'Housing',
-  'Entertainment',
-  'Healthcare',
-  'Travel',
-  'Personal Care',
-  'Fees',
-  'Transfer',
-  'Income',
-  'Groceries',
-  'Bills & Utilities',
-  'Education',
-  'Gifts & Donations',
-  'Savings',
-  'Uncategorized',
-];
+// REMOVED: Hardcoded CATEGORIES array - now fetched from database
 
 const getCategoryColor = (category: string): string => {
   const colorMap: Record<string, string> = {
@@ -64,21 +49,38 @@ const getCategoryColor = (category: string): string => {
 };
 
 export function CategorySelector({
-  currentCategory,
+  currentCategoryId,
+  currentCategoryName,
   onSelect,
   onCancel,
   isOpen = true,
   className,
 }: CategorySelectorProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  const handleSelect = (category: string) => {
+  useEffect(() => {
+    async function fetchCategories() {
+      const result = await getCategoriesAction();
+      if (result.categories) {
+        setCategories(result.categories);
+      }
+      setIsLoading(false);
+    }
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
+
+  const handleSelect = (category: Category) => {
     setSelectedCategory(category);
   };
 
   const handleConfirm = () => {
     if (selectedCategory) {
-      onSelect(selectedCategory);
+      onSelect(selectedCategory.id, selectedCategory.display_name);
       setSelectedCategory(null);
     }
   };
@@ -101,56 +103,64 @@ export function CategorySelector({
     >
       <div className="mb-3">
         <h3 className="text-sm font-medium text-gray-900">Select Category</h3>
-        {currentCategory && (
+        {currentCategoryName && (
           <p className="text-xs text-gray-500 mt-1">
-            Current: <span className="font-medium">{currentCategory}</span>
+            Current: <span className="font-medium">{currentCategoryName}</span>
           </p>
         )}
       </div>
 
-      {/* Category Grid */}
-      <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category}
-            type="button"
-            onClick={() => handleSelect(category)}
-            className={cn(
-              'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              'text-left',
-              getCategoryColor(category),
-              selectedCategory === category && 'ring-2 ring-blue-500',
-              currentCategory === category && 'ring-2 ring-gray-400'
-            )}
-            data-testid={`category-option-${category}`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="text-center py-8">
+          <p className="text-sm text-gray-500">Loading categories...</p>
+        </div>
+      ) : (
+        <>
+          {/* Category Grid */}
+          <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => handleSelect(category)}
+                className={cn(
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-left',
+                  getCategoryColor(category.display_name),
+                  selectedCategory?.id === category.id && 'ring-2 ring-blue-500',
+                  currentCategoryId === category.id && 'ring-2 ring-gray-400'
+                )}
+                data-testid={`category-option-${category.name}`}
+              >
+                {category.display_name}
+              </button>
+            ))}
+          </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleConfirm}
-          disabled={!selectedCategory}
-          fullWidth
-          data-testid="save-category-button"
-        >
-          Save Category
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCancel}
-          fullWidth
-          data-testid="cancel-category-button"
-        >
-          Cancel
-        </Button>
-      </div>
+          {/* Action Buttons */}
+          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleConfirm}
+              disabled={!selectedCategory}
+              fullWidth
+              data-testid="save-category-button"
+            >
+              Save Category
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              fullWidth
+              data-testid="cancel-category-button"
+            >
+              Cancel
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

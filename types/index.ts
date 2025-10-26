@@ -62,6 +62,22 @@ export interface BankConnection {
 }
 
 // ============================================================================
+// Categories (Master Reference)
+// ============================================================================
+
+export interface Category {
+  id: string // UUID
+  name: string // Internal identifier (e.g., "dining_out")
+  display_name: string // User-facing name (e.g., "Dining & Coffee")
+  description: string | null // Category description
+  icon: string | null // Icon name for UI
+  display_order: number // Sort order in UI
+  is_active: boolean // Soft-delete support
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
 // Transactions
 // ============================================================================
 
@@ -76,9 +92,11 @@ export interface Transaction {
   authorized_date: string | null
   pending: boolean
   payment_channel: PaymentChannel
-  category_primary: string | null // From Plaid personal_finance_category.primary
-  category_detailed: string | null // From Plaid personal_finance_category.detailed
-  user_category_override: string | null // User-assigned category
+  category_primary: string | null // From Plaid (for reference only)
+  category_detailed: string | null // From Plaid (for reference only)
+  app_category_id: string // FK to categories (auto-mapped from Plaid)
+  user_category_override: string | null // DEPRECATED - use user_category_override_id
+  user_category_override_id: string | null // FK to categories (user recategorization)
   tag_non_negotiable: boolean
   tag_ignored: boolean
   notes: string | null
@@ -89,9 +107,11 @@ export interface Transaction {
   updated_at: string
 }
 
-// Derived transaction display type
+// Derived transaction display type with category details
 export interface TransactionWithCategory extends Transaction {
-  effective_category: string // user_category_override || category_primary || 'Other'
+  category?: Category // Joined category details (from app_category_id or user_category_override_id)
+  effective_category_id: string // user_category_override_id || app_category_id
+  effective_category_name: string // Category display_name
 }
 
 // ============================================================================
@@ -110,19 +130,21 @@ export interface Budget {
 export interface BudgetCategory {
   id: string // UUID
   budget_id: string
-  category_name: string
+  category_id: string // FK to categories
+  category_name?: string // DEPRECATED - use category_id FK and join to categories
   budgeted_amount: number // Decimal(10,2)
   created_at: string
   updated_at: string
 }
 
-// Derived budget category with spending calculations
+// Derived budget category with category details and spending calculations
 export type BudgetCategoryStatus = 'on_track' | 'warning' | 'alert' | 'over_budget'
 
 export interface BudgetCategoryWithSpending extends BudgetCategory {
-  spent_amount: number // Calculated from transactions
+  category?: Category // Joined category details (from category_id FK)
+  spent_amount: number // Calculated from transactions (NOT stored)
   percentage_used: number // (spent_amount / budgeted_amount) * 100
-  status: BudgetCategoryStatus // Based on percentage_used
+  status: BudgetCategoryStatus // Based on percentage_used: <80 = on_track, 80-100 = warning, >100 = alert
 }
 
 // Dashboard budget utilization summary
@@ -219,7 +241,8 @@ export interface DashboardData {
 
 // Transaction Management
 export interface UpdateTransactionRequest {
-  user_category_override?: string | null
+  user_category_override_id?: string | null // FK to categories
+  user_category_override?: string | null // DEPRECATED - use user_category_override_id
   tag_non_negotiable?: boolean
   tag_ignored?: boolean
   notes?: string | null
@@ -227,7 +250,7 @@ export interface UpdateTransactionRequest {
 
 export interface BulkCategorizeRequest {
   transaction_ids: string[]
-  category: string
+  category_id: string // FK to categories
 }
 
 export interface BulkCategorizeResponse {
@@ -244,7 +267,7 @@ export interface CreateBudgetRequest {
   month: number
   year: number
   categories: Array<{
-    category_name: string
+    category_id: string // FK to categories
     budgeted_amount: number
   }>
 }
@@ -263,7 +286,8 @@ export type BudgetSuggestionSource = 'average' | 'last_month' | 'three_month_ave
 
 export interface SuggestBudgetResponse {
   suggested_categories: Array<{
-    category_name: string
+    category_id: string // FK to categories
+    category_name: string // Display name for convenience
     suggested_amount: number
     based_on: BudgetSuggestionSource
   }>
@@ -273,22 +297,29 @@ export interface SuggestBudgetResponse {
 // Predefined Categories & Constants
 // ============================================================================
 
+// UPDATED: Categories now managed in database, not hardcoded
+// Fetch categories from 'categories' table instead
 export const PREDEFINED_CATEGORIES = [
-  'Groceries',
-  'Dining Out',
-  'Transportation',
-  'Entertainment',
-  'Utilities',
-  'Healthcare',
-  'Shopping',
-  'Other',
+  'groceries',
+  'dining_out',
+  'transportation',
+  'entertainment',
+  'utilities',
+  'healthcare',
+  'shopping',
+  'housing',
+  'personal_care',
+  'education',
+  'travel',
+  'other',
 ] as const
 
 export type PredefinedCategory = (typeof PREDEFINED_CATEGORIES)[number]
 
-// Map Plaid primary categories to app categories
-export const PLAID_CATEGORY_MAPPING: Record<string, PredefinedCategory> = {
-  FOOD_AND_DRINK: 'Dining Out',
+// DEPRECATED: Plaid category mapping now handled by plaid_category_mappings table
+// This is kept for backward compatibility only
+export const PLAID_CATEGORY_MAPPING: Record<string, string> = {
+  FOOD_AND_DRINK: 'Dining & Coffee',
   GENERAL_MERCHANDISE: 'Shopping',
   TRANSPORTATION: 'Transportation',
   ENTERTAINMENT: 'Entertainment',
@@ -296,7 +327,7 @@ export const PLAID_CATEGORY_MAPPING: Record<string, PredefinedCategory> = {
   GENERAL_SERVICES: 'Other',
   RENT_AND_UTILITIES: 'Utilities',
   HOME_IMPROVEMENT: 'Shopping',
-  PERSONAL_CARE: 'Shopping',
+  PERSONAL_CARE: 'Personal Care',
   LOAN_PAYMENTS: 'Other',
   BANK_FEES: 'Other',
   INCOME: 'Other',

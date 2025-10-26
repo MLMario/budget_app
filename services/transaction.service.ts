@@ -1,21 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 
-// Category mapping from Plaid to app categories
-const CATEGORY_MAP: Record<string, string> = {
-  'FOOD_AND_DRINK': 'Dining & Coffee',
-  'TRANSPORTATION': 'Transportation',
-  'GENERAL_MERCHANDISE': 'Shopping',
-  'HOME_IMPROVEMENT': 'Housing',
-  'RENT_AND_UTILITIES': 'Housing',
-  'ENTERTAINMENT': 'Entertainment',
-  'HEALTHCARE': 'Healthcare',
-  'TRAVEL': 'Travel',
-  'PERSONAL_CARE': 'Personal Care',
-  'BANK_FEES': 'Fees',
-  'TRANSFER': 'Transfer',
-  'INCOME': 'Income',
-};
-
 export interface ImportTransactionsResult {
   imported: number;
   skipped: number;
@@ -34,14 +18,9 @@ export interface AddTagResult {
   error: any;
 }
 
-export function categorizeTransaction(plaidCategory: any): string {
-  if (!plaidCategory || !plaidCategory.primary) {
-    return 'Uncategorized';
-  }
-
-  const primary = plaidCategory.primary.toUpperCase();
-  return CATEGORY_MAP[primary] || 'Uncategorized';
-}
+// REMOVED: categorizeTransaction and CATEGORY_MAP
+// Category mapping is now handled by database trigger (auto_map_transaction_category)
+// and plaid_category_mappings table
 
 export async function importTransactions(
   userId: string,
@@ -66,10 +45,8 @@ export async function importTransactions(
         continue;
       }
 
-      // Categorize transaction
-      const category = categorizeTransaction(plaidTx.personal_finance_category);
-
-      // Insert transaction
+      // Insert transaction with Plaid category fields
+      // Database trigger (auto_map_transaction_category) will automatically populate app_category_id
       const { error: insertError } = await supabase
         .from('transactions')
         .insert({
@@ -79,9 +56,9 @@ export async function importTransactions(
           date: plaidTx.date,
           merchant_name: plaidTx.merchant_name || plaidTx.name,
           amount: Math.abs(plaidTx.amount), // Plaid amounts are negative for debits
-          category_primary: category,
-          category_detailed: category,
-          payment_channel: 'online',
+          category_primary: plaidTx.personal_finance_category?.primary || null,
+          category_detailed: plaidTx.personal_finance_category?.detailed || null,
+          payment_channel: plaidTx.payment_channel || 'online',
           tag_non_negotiable: false,
           tag_ignored: false,
         });
@@ -105,7 +82,7 @@ export async function getTransactionsByUser(
   filters?: {
     startDate?: string;
     endDate?: string;
-    category?: string;
+    categoryId?: string; // UPDATED: Use category_id FK instead of category name
   }
 ) {
   try {
@@ -124,14 +101,22 @@ export async function getTransactionsByUser(
       query = query.lte('date', filters.endDate);
     }
 
-    if (filters?.category) {
-      query = query.eq('category_primary', filters.category);
-    }
+    // NOTE: Category filtering needs to check both app_category_id and user_category_override_id
+    // This is better handled in the client by filtering the results after fetch
+    // Or use a database view/function for more complex filtering
 
     const { data, error } = await query;
 
     if (error) {
       throw error;
+    }
+
+    // If category filter specified, filter in memory (checking both category FKs)
+    if (filters?.categoryId && data) {
+      return data.filter((tx: any) => {
+        const effectiveCategoryId = tx.user_category_override_id || tx.app_category_id;
+        return effectiveCategoryId === filters.categoryId;
+      });
     }
 
     return data || [];
@@ -144,15 +129,29 @@ export async function getTransactionsByUser(
 export async function updateCategory(
   userId: string,
   transactionId: string,
-  newCategory: string
+  newCategoryId: string // UPDATED: Use category_id FK instead of category name
 ): Promise<UpdateCategoryResult> {
   try {
     const supabase = await createClient();
 
+    // Validate that the category exists
+    const { data: categoryCheck, error: catError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('id', newCategoryId)
+      .single();
+
+    if (catError || !categoryCheck) {
+      return {
+        success: false,
+        error: 'Invalid category ID',
+      };
+    }
+
     // Get the transaction to find old category and date
     const { data: transaction, error: fetchError } = await supabase
       .from('transactions')
-      .select('user_category_override, category_primary, date')
+      .select('user_category_override_id, app_category_id, date')
       .eq('id', transactionId)
       .eq('user_id', userId)
       .single();
@@ -164,15 +163,15 @@ export async function updateCategory(
       };
     }
 
-    const oldCategory = transaction.user_category_override || transaction.category_primary;
+    const oldCategoryId = transaction.user_category_override_id || transaction.app_category_id;
     const transactionDate = new Date(transaction.date);
     const month = transactionDate.getMonth() + 1;
     const year = transactionDate.getFullYear();
 
-    // Update the category (set user_category_override)
+    // Update the category (set user_category_override_id FK)
     const { error } = await supabase
       .from('transactions')
-      .update({ user_category_override: newCategory })
+      .update({ user_category_override_id: newCategoryId })
       .eq('id', transactionId)
       .eq('user_id', userId);
 
@@ -181,7 +180,7 @@ export async function updateCategory(
     }
 
     // T085: Trigger budget recalculation for affected categories
-    const affectedCategories = [oldCategory, newCategory];
+    const affectedCategories = [oldCategoryId, newCategoryId];
     const { recalculateSpending } = await import('./budget.service');
 
     const recalcResult = await recalculateSpending(
@@ -214,7 +213,7 @@ export async function addTag(
     // Get transaction to find category and date for budget recalculation
     const { data: transaction, error: fetchError } = await supabase
       .from('transactions')
-      .select('category_primary, date')
+      .select('app_category_id, user_category_override_id, date')
       .eq('id', transactionId)
       .eq('user_id', userId)
       .single();
@@ -249,12 +248,13 @@ export async function addTag(
     // T085/T086: Trigger budget recalculation when ignored tag changes
     // because ignored transactions are excluded from budget calculations
     if (tag === 'ignored') {
+      const categoryId = transaction.user_category_override_id || transaction.app_category_id;
       const transactionDate = new Date(transaction.date);
       const month = transactionDate.getMonth() + 1;
       const year = transactionDate.getFullYear();
 
       const { recalculateSpending } = await import('./budget.service');
-      await recalculateSpending(userId, month, year, [transaction.category_primary]);
+      await recalculateSpending(userId, month, year, [categoryId]);
     }
 
     return { success: true, error: null };

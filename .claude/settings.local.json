@@ -26,7 +26,10 @@
       "Bash(if [ -f .gitignore ])",
       "Bash(then grep -q \"node_modules\" .gitignore)",
       "Bash(else echo \"GITIGNORE_MISSING\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(node test-service-layer.js:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

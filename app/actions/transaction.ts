@@ -16,8 +16,8 @@ export async function getTransactionsByUserAction(userId: string, filters?: any)
   return await getTransactionsByUser(userId, filters)
 }
 
-export async function updateCategoryAction(userId: string, transactionId: string, newCategory: string) {
-  return await updateCategory(userId, transactionId, newCategory)
+export async function updateCategoryAction(userId: string, transactionId: string, newCategoryId: string) {
+  return await updateCategory(userId, transactionId, newCategoryId)
 }
 
 export async function addTagAction(userId: string, transactionId: string, tag: 'non-negotiable' | 'ignored') {

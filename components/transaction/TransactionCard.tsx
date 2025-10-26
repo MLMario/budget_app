@@ -18,7 +18,11 @@ export interface Transaction {
   amount: number;
   category_primary?: string;
   category_detailed?: string;
-  user_category_override?: string | null;
+  app_category_id?: string;
+  user_category_override_id?: string | null;
+  user_category_override?: string | null; // DEPRECATED
+  app_category?: { id: string; name: string; display_name: string } | null;
+  user_category?: { id: string; name: string; display_name: string } | null;
   tag_non_negotiable: boolean;
   tag_ignored: boolean;
   notes?: string | null;
@@ -58,7 +62,10 @@ export function TransactionCard({
 }: TransactionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const displayCategory = transaction.user_category_override || transaction.category_primary || 'Uncategorized';
+  // Use joined category data (user override takes precedence over app category)
+  const displayCategory = (transaction as any).user_category?.display_name ||
+                         (transaction as any).app_category?.display_name ||
+                         'Uncategorized';
 
   const handleCardClick = () => {
     setIsExpanded(!isExpanded);
