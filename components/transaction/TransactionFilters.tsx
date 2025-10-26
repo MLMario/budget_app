@@ -108,16 +108,14 @@ export function TransactionFilters({
           )}
         </button>
 
-        {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            data-testid="clear-filters-button"
-          >
-            Clear All
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleClear}
+          data-testid="clear-filters-button"
+        >
+          Clear All
+        </Button>
       </div>
 
       {/* Filter Panel */}

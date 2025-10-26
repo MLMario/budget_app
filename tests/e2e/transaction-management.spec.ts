@@ -301,6 +301,10 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // This test should FAIL until T076 (Transaction Search) is implemented
       await page.click('[data-testid="nav-transactions"]');
 
+      // Clear any filters from previous tests to ensure clean state
+      await page.click('[data-testid="clear-filters-button"]');
+      await page.waitForTimeout(300); // Wait for filters to clear
+
       // Type in search box
       await page.fill('[data-testid="transaction-search-input"]', 'Starbucks');
 
@@ -400,12 +404,29 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       await page.locator('[data-testid="filter-category-dropdown"]').selectOption(entertainmentCategoryId2!);
       await page.click('[data-testid="apply-filters-button"]');
 
+      // Wait for filter to be applied and UI to update (should show only Entertainment = 1 transaction)
+      await page.waitForFunction(
+        () => {
+          const cards = document.querySelectorAll('[data-testid^="transaction-card-"]');
+          return cards.length < 10; // Should filter down from 10 total transactions
+        },
+        { timeout: 5000 }
+      );
+
       // Get filtered count
       const filteredCount = await page.locator('[data-testid^="transaction-card-"]').count();
 
-      // Clear filters
-      await page.click('[data-testid="filter-button"]');
+      // Clear filters (button is always visible now, no need to toggle panel)
       await page.click('[data-testid="clear-filters-button"]');
+
+      // Wait for UI to re-render with all transactions (more than the filtered count)
+      await page.waitForFunction(
+        (expectedMinCount) => {
+          return document.querySelectorAll('[data-testid^="transaction-card-"]').length > expectedMinCount;
+        },
+        filteredCount,
+        { timeout: 5000 }
+      );
 
       // Get unfiltered count
       const unfilteredCount = await page.locator('[data-testid^="transaction-card-"]').count();
