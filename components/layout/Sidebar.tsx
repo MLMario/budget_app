@@ -19,7 +19,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm">
+      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200 flex-col shadow-sm">
         <div className="p-6 border-b border-slate-100">
           <h1 className="text-xl font-bold text-blue-600">Budget App</h1>
         </div>
@@ -49,8 +49,8 @@ export default function Sidebar() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 shadow-lg">
-        <div className="grid grid-cols-4 gap-1 p-2">
-          {navigation.slice(0, 4).map((item) => {
+        <div className="grid grid-cols-6 gap-1 p-2">
+          {navigation.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             return (
@@ -58,7 +58,7 @@ export default function Sidebar() {
                 key={item.name}
                 href={item.href}
                 data-testid={`nav-${item.name.toLowerCase()}`}
-                className={`flex flex-col items-center justify-center py-2 px-3 text-xs font-medium rounded-lg transition-colors ${
+                className={`flex flex-col items-center justify-center py-2 px-1 text-xs font-medium rounded-lg transition-colors ${
                   isActive
                     ? 'bg-blue-50 text-blue-700'
                     : 'text-slate-600 hover:bg-slate-50'

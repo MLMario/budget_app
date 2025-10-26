@@ -35,14 +35,17 @@ Pages: MUST use default exports (export default function Page() {})
 3. Async/Await Requirements
 // ✅ ALWAYS await createClient()
 const supabase = await createClient();  // Returns Promise!
+
 4. Route Groups in Next.js
+
 app/(dashboard)/          ← NO URL segment (organizational only)
   transactions/page.tsx   → Creates /transactions (NOT /dashboard/transactions)
 Lesson from Fix #2: Parentheses exclude folders from URL paths. 5. Database Schema Alignment
 Always verify service code matches actual database schema
 Example: category vs category_primary mismatch caught in Fix #3
+
 6. E2E Testing Requirements
-ALL interactive elements need data-testid attributes
+-ALL interactive elements need data-testid attributes
 Test setup MUST seed realistic data (all required fields)
 Pattern: data-testid="action-element" format
 Always wait for React re-renders after state-changing actions

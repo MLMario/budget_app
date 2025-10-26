@@ -226,6 +226,15 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 **Checkpoint**: Toggle-based transaction tag actions complete - users can add/remove Ignore and Non-negotiable tags with visual feedback, mutual exclusivity enforced
 
+**Responsive Navigation Fixes (Design Issues)**
+
+**Purpose**: Fix responsive design issues where sidebar doesn't collapse on mobile and bottom navigation only shows 4 out of 6 menu options
+
+- [x] AddT010 [US2] Hide sidebar on mobile screens in `components/layout/Sidebar.tsx` (add `hidden lg:flex` classes to sidebar element on line 22 to hide on screens < 1024px, show on desktop ≥ 1024px)
+- [x] AddT011 [US2] Show all 6 menu items in bottom navigation in `components/layout/Sidebar.tsx` (line 52: change `grid-cols-4` to `grid-cols-6`, line 53: remove `.slice(0, 4)` to show all navigation items, line 61: adjust padding from `px-3` to `px-1` for comfortable fit with 6 items)
+
+**Checkpoint**: Responsive navigation complete - sidebar hidden on mobile, bottom nav shows all 6 menu options (Dashboard, Transactions, Budgets, AI Insights, Goals & Preferences, Settings)
+
 **Checkpoint**: User Story 2 complete - users can manage transactions with recategorization, tagging, search/filter, search/filter implemented
 
 ---
