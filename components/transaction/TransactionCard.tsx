@@ -219,27 +219,27 @@ export function TransactionCard({
               Recategorize
             </Button>
 
-            {!transaction.tag_non_negotiable && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleTagNonNegotiable}
-                data-testid="tag-non-negotiable-button"
-              >
-                Mark Non-negotiable
-              </Button>
-            )}
+            {/* AddT009: Non-negotiable Button - Toggle with visual states */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTagNonNegotiable}
+              data-testid="tag-non-negotiable-button"
+              className={transaction.tag_non_negotiable ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200 hover:text-purple-800' : ''}
+            >
+              {transaction.tag_non_negotiable ? 'Remove Non-negotiable' : 'Mark Non-negotiable'}
+            </Button>
 
-            {!transaction.tag_ignored && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleTagIgnored}
-                data-testid="tag-ignored-button"
-              >
-                Ignore from Budget
-              </Button>
-            )}
+            {/* AddT009: Ignore Button - Toggle with visual states */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTagIgnored}
+              data-testid="tag-ignored-button"
+              className={transaction.tag_ignored ? 'bg-gray-200 text-gray-700 border-gray-400 hover:bg-gray-300 hover:text-gray-800' : ''}
+            >
+              {transaction.tag_ignored ? 'Restore to Budget' : 'Ignore from Budget'}
+            </Button>
 
             <Button
               variant="ghost"

@@ -5,6 +5,7 @@ import {
   getTransactionsByUser,
   updateCategory,
   addTag,
+  toggleTag,
   updateNotes
 } from '@/services/transaction.service'
 
@@ -22,6 +23,11 @@ export async function updateCategoryAction(userId: string, transactionId: string
 
 export async function addTagAction(userId: string, transactionId: string, tag: 'non-negotiable' | 'ignored') {
   return await addTag(userId, transactionId, tag)
+}
+
+// AddT008: Toggle tag action (add if not present, remove if present)
+export async function toggleTagAction(userId: string, transactionId: string, tag: 'non-negotiable' | 'ignored') {
+  return await toggleTag(userId, transactionId, tag)
 }
 
 export async function updateNotesAction(userId: string, transactionId: string, notes: string) {

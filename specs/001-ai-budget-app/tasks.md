@@ -192,9 +192,7 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 - [x] T080 [US2] Create quick action buttons in `components/transaction/QuickActions.tsx` (Recategorize, Non-negotiable, Ignore, Add Note)
 - [x] T081 [US2] Create transaction notes modal in `components/transaction/NotesModal.tsx` for adding/editing notes
 
-#### User Feedback System
 
-- [x] AddT001 [US2] Create Toast notification component in `components/ui/Toast.tsx` with success/error variants, auto-dismiss, and multiple toast queue support (required for user action feedback across all transaction operations)
 
 #### Pattern Learning
 
@@ -206,6 +204,27 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 - [x] T085 [US2] Add real-time budget update logic in `services/budget.service.ts` (recalculateSpending function triggered on category changes)
 - [x] T086 [US2] Add budget exclusion logic in `services/budget.service.ts` (ignore transactions tagged as "ignored" in spending calculations)
+
+#### Additional Tasks Added During Development
+
+**User Feedback System**
+
+- [x] AddT001 [US2] Create Toast notification component in `components/ui/Toast.tsx` with success/error variants, auto-dismiss, and multiple toast queue support (required for user action feedback across all transaction operations)
+
+**Toggle-Based Transaction Tag Actions (Spec Update: Acceptance Scenarios 4-7, FR-019, FR-020a, FR-020b)**
+
+**Purpose**: Implement toggle functionality for Non-negotiable and Ignore transaction action buttons to allow users to add and remove tags with visual feedback, maintaining mutual exclusivity
+
+- [x] AddT002 [P] [US2] Update unit tests in `tests/unit/transaction.service.test.ts` to test toggle behavior (add tag if not present, remove tag if present, verify mutual exclusivity on toggle)
+- [x] AddT003 [P] [US2] Update E2E tests in `tests/e2e/transaction-management.spec.ts` to test toggle UI behavior (click to add, click again to remove, verify button highlight states, verify mutual exclusivity)
+- [x] AddT004 [US2] Implement `toggleTag` function in `services/transaction.service.ts` (check if tag exists, add if not present, remove if present, enforce mutual exclusivity: adding 'ignored' removes 'non_negotiable' and vice versa)
+- [x] AddT005 [US2] Implement `removeTag` helper function in `services/transaction.service.ts` (remove specific tag from transaction tags array, update database, return updated transaction)
+- [x] AddT006 [US2] Update `QuickActions.tsx` component to accept current transaction tags as prop and calculate button active states (is_ignored, is_non_negotiable boolean flags derived from tags)
+- [x] AddT007 [US2] Add visual state styling to `QuickActions.tsx` for active/inactive button states (highlighted when tag active using colored background/border, unhighlighted when tag inactive, ensure WCAG 2.1 AA contrast compliance)
+- [x] AddT008 [US2] Update onClick handlers in `QuickActions.tsx` to call `toggleTag` instead of `addTag` for Ignore and Non-negotiable buttons (handle optimistic UI updates, trigger transaction list refresh on success)
+- [x] AddT009 [US2] Verify `TransactionCard.tsx` passes full transaction object (including tags) to `QuickActions.tsx` component and refreshes when tags change
+
+**Checkpoint**: Toggle-based transaction tag actions complete - users can add/remove Ignore and Non-negotiable tags with visual feedback, mutual exclusivity enforced
 
 **Checkpoint**: User Story 2 complete - users can manage transactions with recategorization, tagging, search/filter, search/filter implemented
 

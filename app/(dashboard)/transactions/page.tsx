@@ -14,7 +14,7 @@ import { TransactionFilters, TransactionFilter } from '@/components/transaction/
 import { CategorySelector } from '@/components/transaction/CategorySelector';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { updateCategoryAction, addTagAction } from '@/app/actions/transaction';
+import { updateCategoryAction, toggleTagAction } from '@/app/actions/transaction';
 import { createBrowserClient } from '@supabase/ssr';
 import { useToast } from '@/lib/hooks/useToast';
 
@@ -179,34 +179,63 @@ export default function TransactionsPage() {
     }
   };
 
+  // AddT008: Updated to use toggleTagAction for toggle behavior with optimistic updates
   const handleTag = async (transactionId: string, tag: 'non-negotiable' | 'ignored') => {
     if (!userId) return;
 
     try {
-      const result = await addTagAction(userId, transactionId, tag);
+      // Find current transaction to determine if we're adding or removing
+      const currentTransaction = transactions.find((t) => t.id === transactionId);
+      if (!currentTransaction) return;
+
+      const isCurrentlyActive = tag === 'non-negotiable'
+        ? currentTransaction.tag_non_negotiable
+        : currentTransaction.tag_ignored;
+
+      const result = await toggleTagAction(userId, transactionId, tag);
 
       if (result.success) {
-        // Update local state
+        // Optimistic update: Update local state instead of fetching all transactions
+        // This prevents the expanded card from collapsing after tag toggle
         setTransactions((prev) =>
           prev.map((t) => {
             if (t.id === transactionId) {
-              return {
-                ...t,
-                tag_non_negotiable: tag === 'non-negotiable' ? true : false,
-                tag_ignored: tag === 'ignored' ? true : false,
-              };
+              // Toggle the target tag
+              const updatedTransaction = { ...t };
+
+              if (tag === 'non-negotiable') {
+                updatedTransaction.tag_non_negotiable = !isCurrentlyActive;
+                // Enforce mutual exclusivity: remove ignored tag if adding non-negotiable
+                if (!isCurrentlyActive) {
+                  updatedTransaction.tag_ignored = false;
+                }
+              } else {
+                updatedTransaction.tag_ignored = !isCurrentlyActive;
+                // Enforce mutual exclusivity: remove non-negotiable tag if adding ignored
+                if (!isCurrentlyActive) {
+                  updatedTransaction.tag_non_negotiable = false;
+                }
+              }
+
+              return updatedTransaction;
             }
             return t;
           })
         );
+
         const tagLabel = tag === 'non-negotiable' ? 'non-negotiable' : 'ignored';
-        toast.success(`Tagged as ${tagLabel}`);
+        const action = isCurrentlyActive ? 'removed' : 'added';
+        toast.success(`Tag ${action}: ${tagLabel}`);
       } else {
-        console.error('Failed to add tag:', result.error);
-        toast.error('Failed to add tag. Please try again.');
+        console.error('Failed to toggle tag:', result.error);
+        // Only fetch on error to restore correct state
+        await fetchTransactions();
+        toast.error('Failed to toggle tag. Please try again.');
       }
     } catch (error) {
-      console.error('Error adding tag:', error);
+      console.error('Error toggling tag:', error);
+      // Fetch on error to restore correct state
+      await fetchTransactions();
       toast.error('An error occurred. Please try again.');
     }
   };

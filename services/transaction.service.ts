@@ -265,6 +265,115 @@ export async function addTag(
 }
 
 /**
+ * AddT005: Remove a specific tag from a transaction
+ * Helper function to remove either 'non-negotiable' or 'ignored' tag
+ */
+export async function removeTag(
+  userId: string,
+  transactionId: string,
+  tag: 'non-negotiable' | 'ignored'
+): Promise<AddTagResult> {
+  try {
+    const supabase = await createClient();
+
+    // Get transaction to find category and date for budget recalculation
+    const { data: transaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('app_category_id, user_category_override_id, date')
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !transaction) {
+      return {
+        success: false,
+        error: fetchError || 'Transaction not found or Unauthorized',
+      };
+    }
+
+    // Remove the specified tag
+    const updates: any = {};
+    if (tag === 'non-negotiable') {
+      updates.tag_non_negotiable = false;
+    } else {
+      updates.tag_ignored = false;
+    }
+
+    const { error } = await supabase
+      .from('transactions')
+      .update(updates)
+      .eq('id', transactionId)
+      .eq('user_id', userId);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    // Trigger budget recalculation when ignored tag is removed
+    // because the transaction needs to be included back in budget calculations
+    if (tag === 'ignored') {
+      const categoryId = transaction.user_category_override_id || transaction.app_category_id;
+      const transactionDate = new Date(transaction.date);
+      const month = transactionDate.getMonth() + 1;
+      const year = transactionDate.getFullYear();
+
+      const { recalculateSpending } = await import('./budget.service');
+      await recalculateSpending(userId, month, year, [categoryId]);
+    }
+
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error('Error removing tag:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * AddT004: Toggle a tag on a transaction (add if not present, remove if present)
+ * Enforces mutual exclusivity between 'non-negotiable' and 'ignored' tags
+ */
+export async function toggleTag(
+  userId: string,
+  transactionId: string,
+  tag: 'non-negotiable' | 'ignored'
+): Promise<AddTagResult> {
+  try {
+    const supabase = await createClient();
+
+    // Get current transaction state
+    const { data: transaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('tag_non_negotiable, tag_ignored, app_category_id, user_category_override_id, date')
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !transaction) {
+      return {
+        success: false,
+        error: fetchError || 'Transaction not found or Unauthorized',
+      };
+    }
+
+    // Determine if tag is currently active
+    const isTagActive = tag === 'non-negotiable'
+      ? transaction.tag_non_negotiable
+      : transaction.tag_ignored;
+
+    // If tag is active, remove it
+    if (isTagActive) {
+      return await removeTag(userId, transactionId, tag);
+    }
+
+    // If tag is not active, add it (which enforces mutual exclusivity)
+    return await addTag(userId, transactionId, tag);
+  } catch (error: any) {
+    console.error('Error toggling tag:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Add or update notes for a transaction (T081)
  */
 export async function updateNotes(

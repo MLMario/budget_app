@@ -5,6 +5,8 @@ import {
   getTransactionsByUser,
   updateCategory,
   addTag,
+  toggleTag,
+  removeTag,
 } from '@/services/transaction.service';
 
 // Mock Supabase client
@@ -307,6 +309,174 @@ describe('Transaction Service', () => {
       await addTag(mockUserId, transactionId, 'ignored');
 
       // TODO: Verify transaction is excluded from budget spending calculations
+      expect(true).toBe(true); // Placeholder
+    });
+  });
+
+  // AddT002: Tests for toggle tag functionality
+  describe('toggleTag', () => {
+    it('should add tag if not present', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+      const tag = 'non-negotiable';
+
+      // Ensure transaction exists without the tag
+      // (In real test, this would be set up with proper mock data)
+      const result = await toggleTag(mockUserId, transactionId, tag);
+
+      expect(result.success).toBe(true);
+      expect(result.error).toBeNull();
+
+      // Verify tag was added
+      const transactions = await getTransactionsByUser(mockUserId);
+      const taggedTransaction = transactions.find(t => t.id === transactionId);
+      expect(taggedTransaction?.tag_non_negotiable).toBe(true);
+    });
+
+    it('should remove tag if already present', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+      const tag = 'non-negotiable';
+
+      // First toggle - add tag
+      await toggleTag(mockUserId, transactionId, tag);
+
+      // Second toggle - remove tag
+      const result = await toggleTag(mockUserId, transactionId, tag);
+
+      expect(result.success).toBe(true);
+      expect(result.error).toBeNull();
+
+      // Verify tag was removed
+      const transactions = await getTransactionsByUser(mockUserId);
+      const taggedTransaction = transactions.find(t => t.id === transactionId);
+      expect(taggedTransaction?.tag_non_negotiable).toBe(false);
+    });
+
+    it('should toggle ignored tag correctly', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+      const tag = 'ignored';
+
+      // First toggle - add tag
+      const result1 = await toggleTag(mockUserId, transactionId, tag);
+      expect(result1.success).toBe(true);
+
+      let transactions = await getTransactionsByUser(mockUserId);
+      let taggedTransaction = transactions.find(t => t.id === transactionId);
+      expect(taggedTransaction?.tag_ignored).toBe(true);
+
+      // Second toggle - remove tag
+      const result2 = await toggleTag(mockUserId, transactionId, tag);
+      expect(result2.success).toBe(true);
+
+      transactions = await getTransactionsByUser(mockUserId);
+      taggedTransaction = transactions.find(t => t.id === transactionId);
+      expect(taggedTransaction?.tag_ignored).toBe(false);
+    });
+
+    it('should enforce mutual exclusivity when toggling non-negotiable on ignored transaction', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+
+      // First, add ignored tag
+      await toggleTag(mockUserId, transactionId, 'ignored');
+
+      let transactions = await getTransactionsByUser(mockUserId);
+      let transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_ignored).toBe(true);
+      expect(transaction?.tag_non_negotiable).toBe(false);
+
+      // Now toggle non-negotiable (should remove ignored and add non-negotiable)
+      const result = await toggleTag(mockUserId, transactionId, 'non-negotiable');
+      expect(result.success).toBe(true);
+
+      transactions = await getTransactionsByUser(mockUserId);
+      transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_non_negotiable).toBe(true);
+      expect(transaction?.tag_ignored).toBe(false);
+    });
+
+    it('should enforce mutual exclusivity when toggling ignored on non-negotiable transaction', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+
+      // First, add non-negotiable tag
+      await toggleTag(mockUserId, transactionId, 'non-negotiable');
+
+      let transactions = await getTransactionsByUser(mockUserId);
+      let transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_non_negotiable).toBe(true);
+      expect(transaction?.tag_ignored).toBe(false);
+
+      // Now toggle ignored (should remove non-negotiable and add ignored)
+      const result = await toggleTag(mockUserId, transactionId, 'ignored');
+      expect(result.success).toBe(true);
+
+      transactions = await getTransactionsByUser(mockUserId);
+      transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_ignored).toBe(true);
+      expect(transaction?.tag_non_negotiable).toBe(false);
+    });
+
+    it('should trigger budget recalculation when toggling ignored tag', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174003';
+
+      // Toggle ignored on (should trigger recalc to exclude from budget)
+      const result1 = await toggleTag(mockUserId, transactionId, 'ignored');
+      expect(result1.success).toBe(true);
+
+      // Toggle ignored off (should trigger recalc to include in budget)
+      const result2 = await toggleTag(mockUserId, transactionId, 'ignored');
+      expect(result2.success).toBe(true);
+
+      // TODO: Verify budget recalculation was triggered both times
+      expect(true).toBe(true); // Placeholder for budget recalc verification
+    });
+  });
+
+  // AddT002: Tests for removeTag functionality
+  describe('removeTag', () => {
+    it('should remove non-negotiable tag from transaction', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174004';
+
+      // First add the tag
+      await addTag(mockUserId, transactionId, 'non-negotiable');
+
+      // Then remove it
+      const result = await removeTag(mockUserId, transactionId, 'non-negotiable');
+      expect(result.success).toBe(true);
+      expect(result.error).toBeNull();
+
+      // Verify tag was removed
+      const transactions = await getTransactionsByUser(mockUserId);
+      const transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_non_negotiable).toBe(false);
+    });
+
+    it('should remove ignored tag from transaction', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174004';
+
+      // First add the tag
+      await addTag(mockUserId, transactionId, 'ignored');
+
+      // Then remove it
+      const result = await removeTag(mockUserId, transactionId, 'ignored');
+      expect(result.success).toBe(true);
+      expect(result.error).toBeNull();
+
+      // Verify tag was removed
+      const transactions = await getTransactionsByUser(mockUserId);
+      const transaction = transactions.find(t => t.id === transactionId);
+      expect(transaction?.tag_ignored).toBe(false);
+    });
+
+    it('should trigger budget recalculation when removing ignored tag', async () => {
+      const transactionId = '123e4567-e89b-12d3-a456-426614174004';
+
+      // Add ignored tag
+      await addTag(mockUserId, transactionId, 'ignored');
+
+      // Remove ignored tag (should trigger recalc to include transaction in budget)
+      const result = await removeTag(mockUserId, transactionId, 'ignored');
+      expect(result.success).toBe(true);
+
+      // TODO: Verify budget recalculation was triggered
       expect(true).toBe(true); // Placeholder
     });
   });

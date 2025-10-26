@@ -39,9 +39,11 @@ A user needs to review, categorize, and tag their transactions to ensure accurat
 1. **Given** new transactions appear on the dashboard, **When** the user views them, **Then** each transaction displays the merchant name, amount, auto-assigned category, and date
 2. **Given** a transaction is miscategorized, **When** the user clicks "Recategorize" and selects a new category, **Then** the transaction updates to the new category and the budget tracking reflects the change
 3. ~~**Given** a user recategorizes multiple transactions from the same merchant, **When** the system detects the pattern, **Then** it prompts "Should future transactions from [Merchant] be [Category]?" and learns from the confirmation~~ **(REMOVED - Simplification)**
-4. **Given** a transaction should not count toward budgets, **When** the user clicks "Ignore", **Then** the transaction is grayed out and excluded from all budget calculations
-5. **Given** a transaction represents non-negotiable spending, **When** the user clicks "Non-negotiable", **Then** the transaction displays a special badge and AI recommendations will respect this constraint
-6. **Given** a user wants to find specific transactions, **When** they use search and filters, **Then** they can filter by date range, category, merchant, or amount
+4. **Given** a transaction should not count toward budgets, **When** the user clicks "Ignore" action button, **Then** the button becomes highlighted, the transaction is grayed out, and excluded from all budget calculations, **And When** the user clicks "Ignore" again, **Then** the button becomes unhighlighted and the transaction is restored to normal display and included in budget calculations
+5. **Given** a transaction represents non-negotiable spending, **When** the user clicks "Non-negotiable" action button, **Then** the button becomes highlighted, the transaction displays a special badge, and AI recommendations will respect this constraint, **And When** the user clicks "Non-negotiable" again, **Then** the button becomes unhighlighted, the badge is removed, and the transaction is no longer treated as non-negotiable
+6. **Given** a transaction has the "Ignore" tag active, **When** the user clicks "Non-negotiable", **Then** the "Ignore" tag is automatically removed (button unhighlighted, transaction restored to normal), the "Non-negotiable" tag is applied (button highlighted, badge displayed), maintaining mutual exclusivity
+7. **Given** a transaction has the "Non-negotiable" tag active, **When** the user clicks "Ignore", **Then** the "Non-negotiable" tag is automatically removed (button unhighlighted, badge removed), the "Ignore" tag is applied (button highlighted, transaction grayed out), maintaining mutual exclusivity
+8. **Given** a user wants to find specific transactions, **When** they use search and filters, **Then** they can filter by date range, category, merchant, or amount
 
 ---
 
@@ -262,8 +264,10 @@ A user wants to interact with AI recommendations by providing feedback, getting 
 - **FR-016**: System MUST deduplicate transactions to prevent the same transaction from being imported multiple times
 - **FR-017**: Users MUST be able to view all transactions with merchant name, amount, category, date, and payment source
 - **FR-018**: Users MUST be able to manually recategorize any transaction
-- **FR-019**: Users MUST be able to tag transactions as "Non-negotiable"
-- **FR-020**: Users MUST be able to tag transactions as "Ignored" to exclude them from budget tracking
+- **FR-019**: Users MUST be able to toggle the "Non-negotiable" tag on transactions (add and remove)
+- **FR-020**: Users MUST be able to toggle the "Ignored" tag on transactions to exclude them from or include them in budget tracking (add and remove)
+- **FR-020a**: System MUST enforce mutual exclusivity between "Non-negotiable" and "Ignored" tags - applying one tag automatically removes the other if present
+- **FR-020b**: Action buttons for "Non-negotiable" and "Ignored" MUST provide visual feedback showing their active state (highlighted when tag is applied, unhighlighted when tag is removed)
 - **FR-021**: System MUST learn from user recategorization patterns and improve automatic categorization accuracy over time
 - **FR-022**: Users MUST be able to search and filter transactions by date range, category, merchant, or amount
 - **FR-023**: System MUST allow users to add notes to individual transactions
@@ -562,7 +566,7 @@ This specification is aligned with **[design-proposal-1.md](../../../design-prop
 
 1. **Proactive Dashboard**: Budget utilization and projected spend visible immediately, not buried
 2. **Context-Aware AI**: Every recommendation shows "Respects your preference to..."
-3. **One-Click Actions**: Tag as non-negotiable, recategorize, ignore - all single clicks
+3. **Toggle-Based Tag Actions**: Tag as non-negotiable or ignore with toggle buttons (highlighted when active) - click to add, click again to remove. Recategorize remains a one-time selection action.
 4. **Visual Preference Acknowledgment**: Non-negotiable badge visible on transactions and in AI insights
 5. **Weekly Predictions**: Not just "you spent $X" but "at this pace, you'll finish at $Y"
 
