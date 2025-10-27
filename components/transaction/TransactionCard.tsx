@@ -225,9 +225,9 @@ export function TransactionCard({
               size="sm"
               onClick={handleTagNonNegotiable}
               data-testid="tag-non-negotiable-button"
-              className={transaction.tag_non_negotiable ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200 hover:text-purple-800' : ''}
+              className={transaction.tag_non_negotiable ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:text-gray-800' : ''}
             >
-              {transaction.tag_non_negotiable ? 'Remove Non-negotiable' : 'Mark Non-negotiable'}
+              Non-negotiable
             </Button>
 
             {/* AddT009: Ignore Button - Toggle with visual states */}
@@ -236,9 +236,9 @@ export function TransactionCard({
               size="sm"
               onClick={handleTagIgnored}
               data-testid="tag-ignored-button"
-              className={transaction.tag_ignored ? 'bg-gray-200 text-gray-700 border-gray-400 hover:bg-gray-300 hover:text-gray-800' : ''}
+              className={transaction.tag_ignored ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:text-gray-800' : ''}
             >
-              {transaction.tag_ignored ? 'Restore to Budget' : 'Ignore from Budget'}
+              Ignore
             </Button>
 
             <Button
