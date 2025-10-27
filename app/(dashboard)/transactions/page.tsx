@@ -223,9 +223,8 @@ export default function TransactionsPage() {
           })
         );
 
-        const tagLabel = tag === 'non-negotiable' ? 'non-negotiable' : 'ignored';
-        const action = isCurrentlyActive ? 'removed' : 'added';
-        toast.success(`Tag ${action}: ${tagLabel}`);
+        // Tag toggle successful - no toast notification needed
+        // Visual feedback is provided by button highlight state
       } else {
         console.error('Failed to toggle tag:', result.error);
         // Only fetch on error to restore correct state
@@ -264,7 +263,7 @@ export default function TransactionsPage() {
           <div className="flex items-center justify-between">
             <CardTitle>Transactions</CardTitle>
             <Button variant="primary" size="sm">
-              Import Transactions
+              Add Transaction
             </Button>
           </div>
         </CardHeader>
@@ -306,7 +305,7 @@ export default function TransactionsPage() {
             )}
 
             {/* Transaction List */}
-            <div className="space-y-3">
+            <div className="space-y-1">
               {filteredTransactions.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <svg
