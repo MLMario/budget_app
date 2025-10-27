@@ -235,6 +235,16 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 **Checkpoint**: Responsive navigation complete - sidebar hidden on mobile, bottom nav shows all 6 menu options (Dashboard, Transactions, Budgets, AI Insights, Goals & Preferences, Settings)
 
+**Category Selection Modal Redesign (Design Issues)**
+
+**Purpose**: Convert category selector from inline panel to full modal overlay with icons matching screenshot reference
+
+- [x] AddT012 [US2] Convert CategorySelector to modal overlay in `components/transaction/CategorySelector.tsx` (add fixed full-screen backdrop with `bg-black/50`, center modal container with `max-w-md`, add close X button in header, make scrollable with `max-h-[80vh] overflow-y-auto`)
+- [x] AddT013 [US2] Add category icons to CategorySelector in `components/transaction/CategorySelector.tsx` (import lucide-react icons: ShoppingCart for Groceries, Coffee for Dining & Coffee, Car for Transportation, Film for Entertainment, Heart for Healthcare, Home for Housing, ShoppingBag for Shopping, Droplet for Personal Care, GraduationCap for Education, Plane for Travel, Grid for Other; display icon above category name in each card)
+- [x] AddT014 [US2] Update CategorySelector styling to match modal design in `components/transaction/CategorySelector.tsx` (update selected state to use `bg-blue-50 border-blue-500`, increase card height for icon+text layout, reorder buttons with Cancel left and Save Category right, add `role="dialog"` and `aria-modal="true"` for accessibility, add backdrop click-to-close and ESC key handler)
+
+**Checkpoint**: Category selector modal complete - users see professional modal with icons, backdrop overlay, and improved UX matching design reference
+
 **Checkpoint**: User Story 2 complete - users can manage transactions with recategorization, tagging, search/filter, search/filter implemented
 
 ---

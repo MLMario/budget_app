@@ -2,8 +2,8 @@
  * CategorySelector Component
  *
  * T077: Dropdown component for recategorizing transactions
+ * AddT012-014: Converted to full modal overlay with icons matching design reference
  * Displays all available budget categories from database with visual styling
- * UPDATED: Now fetches categories from database instead of hardcoded list
  */
 
 'use client';
@@ -13,39 +13,54 @@ import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/Button';
 import { getCategoriesAction } from '@/app/actions/category';
 import type { Category } from '@/types';
+import {
+  X,
+  ShoppingCart,
+  Coffee,
+  Car,
+  Film,
+  Heart,
+  Home,
+  ShoppingBag,
+  Droplet,
+  GraduationCap,
+  Plane,
+  Grid,
+  type LucideIcon,
+} from 'lucide-react';
 
 export interface CategorySelectorProps {
-  currentCategoryId?: string; // UPDATED: Use category ID instead of name
-  currentCategoryName?: string; // For display only
-  onSelect: (categoryId: string, categoryName: string) => void; // UPDATED: Return both ID and name
+  currentCategoryId?: string;
+  currentCategoryName?: string;
+  onSelect: (categoryId: string, categoryName: string) => void;
   onCancel?: () => void;
   isOpen?: boolean;
   className?: string;
 }
 
-// REMOVED: Hardcoded CATEGORIES array - now fetched from database
-
-const getCategoryColor = (category: string): string => {
-  const colorMap: Record<string, string> = {
-    'Dining & Coffee': 'bg-orange-100 text-orange-800 hover:bg-orange-200',
-    'Transportation': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-    'Shopping': 'bg-pink-100 text-pink-800 hover:bg-pink-200',
-    'Housing': 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-    'Entertainment': 'bg-red-100 text-red-800 hover:bg-red-200',
-    'Healthcare': 'bg-green-100 text-green-800 hover:bg-green-200',
-    'Travel': 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200',
-    'Personal Care': 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200',
-    'Fees': 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-    'Transfer': 'bg-slate-100 text-slate-800 hover:bg-slate-200',
-    'Income': 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
-    'Groceries': 'bg-lime-100 text-lime-800 hover:bg-lime-200',
-    'Bills & Utilities': 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-    'Education': 'bg-violet-100 text-violet-800 hover:bg-violet-200',
-    'Gifts & Donations': 'bg-rose-100 text-rose-800 hover:bg-rose-200',
-    'Savings': 'bg-teal-100 text-teal-800 hover:bg-teal-200',
-    'Uncategorized': 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+// Icon mapping for categories (AddT013)
+const getCategoryIcon = (categoryName: string): LucideIcon => {
+  const iconMap: Record<string, LucideIcon> = {
+    'groceries': ShoppingCart,
+    'dining_out': Coffee,
+    'dining & coffee': Coffee,
+    'transportation': Car,
+    'entertainment': Film,
+    'healthcare': Heart,
+    'housing': Home,
+    'shopping': ShoppingBag,
+    'personal_care': Droplet,
+    'personal care': Droplet,
+    'education': GraduationCap,
+    'travel': Plane,
+    'other': Grid,
+    'uncategorized': Grid,
+    'bills_and_utilities': Home,
+    'bills & utilities': Home,
   };
-  return colorMap[category] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+
+  const normalizedName = categoryName.toLowerCase().replace(/[_\s]+/g, '_');
+  return iconMap[normalizedName] || iconMap[categoryName.toLowerCase()] || Grid;
 };
 
 export function CategorySelector({
@@ -74,6 +89,26 @@ export function CategorySelector({
     }
   }, [isOpen]);
 
+  // ESC key handler (AddT014)
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen && onCancel) {
+        onCancel();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onCancel]);
+
   const handleSelect = (category: Category) => {
     setSelectedCategory(category);
   };
@@ -92,75 +127,140 @@ export function CategorySelector({
     }
   };
 
+  // Backdrop click handler (AddT014)
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && onCancel) {
+      onCancel();
+    }
+  };
+
   if (!isOpen) {
     return null;
   }
 
   return (
+    // AddT012: Full-screen modal overlay with backdrop
     <div
-      className={cn('bg-white border border-gray-300 rounded-lg shadow-lg p-4', className)}
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="category-modal-title"
       data-testid="category-selector"
     >
-      <div className="mb-3">
-        <h3 className="text-sm font-medium text-gray-900">Select Category</h3>
-        {currentCategoryName && (
-          <p className="text-xs text-gray-500 mt-1">
-            Current: <span className="font-medium">{currentCategoryName}</span>
-          </p>
+      {/* Modal Container */}
+      <div
+        className={cn(
+          'bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col',
+          className
         )}
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-8">
-          <p className="text-sm text-gray-500">Loading categories...</p>
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with Close Button */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3
+            id="category-modal-title"
+            className="text-lg font-semibold text-gray-900"
+          >
+            Select Category
+          </h3>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close modal"
+            data-testid="close-category-modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      ) : (
-        <>
-          {/* Category Grid */}
-          <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => handleSelect(category)}
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  'text-left',
-                  getCategoryColor(category.display_name),
-                  selectedCategory?.id === category.id && 'ring-2 ring-blue-500',
-                  currentCategoryId === category.id && 'ring-2 ring-gray-400'
-                )}
-                data-testid={`category-option-${category.name}`}
-              >
-                {category.display_name}
-              </button>
-            ))}
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleConfirm}
-              disabled={!selectedCategory}
-              fullWidth
-              data-testid="save-category-button"
-            >
-              Save Category
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCancel}
-              fullWidth
-              data-testid="cancel-category-button"
-            >
-              Cancel
-            </Button>
-          </div>
-        </>
-      )}
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">Loading categories...</p>
+            </div>
+          ) : (
+            <>
+              {/* Current Category Display */}
+              {currentCategoryName && (
+                <p className="text-xs text-gray-500 mb-4">
+                  Current: <span className="font-medium">{currentCategoryName}</span>
+                </p>
+              )}
+
+              {/* Category Grid (AddT013: With Icons, AddT014: Updated Styling) */}
+              <div className="grid grid-cols-2 gap-3">
+                {categories.map((category) => {
+                  const Icon = getCategoryIcon(category.name);
+                  const isSelected = selectedCategory?.id === category.id;
+                  const isCurrent = currentCategoryId === category.id;
+
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => handleSelect(category)}
+                      className={cn(
+                        'flex flex-col items-center justify-center py-4 px-3 rounded-lg',
+                        'border-2 transition-all duration-200',
+                        'text-sm font-medium',
+                        'hover:shadow-md',
+                        // Selected state (AddT014)
+                        isSelected && 'bg-blue-50 border-blue-500 shadow-md',
+                        // Current category state
+                        !isSelected && isCurrent && 'bg-gray-50 border-gray-300',
+                        // Default state
+                        !isSelected && !isCurrent && 'bg-white border-gray-200 hover:border-gray-300'
+                      )}
+                      data-testid={`category-option-${category.name}`}
+                    >
+                      <Icon
+                        className={cn(
+                          'w-6 h-6 mb-2',
+                          isSelected ? 'text-blue-600' : 'text-gray-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'text-center',
+                          isSelected ? 'text-blue-700' : 'text-gray-700'
+                        )}
+                      >
+                        {category.display_name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer with Action Buttons (AddT014: Reordered) */}
+        <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCancel}
+            className="flex-1"
+            data-testid="cancel-category-button"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleConfirm}
+            disabled={!selectedCategory}
+            className="flex-1"
+            data-testid="save-category-button"
+          >
+            Save Category
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

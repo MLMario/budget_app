@@ -9,7 +9,7 @@ const navigation = [
   { name: 'Transactions', href: '/transactions', icon: Receipt },
   { name: 'Budgets', href: '/budgets', icon: PiggyBank },
   { name: 'AI Insights', href: '/ai-insights', icon: Sparkles },
-  { name: 'Goals & Preferences', href: '/goals', icon: Target },
+  { name: 'Goals', href: '/goals', icon: Target },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

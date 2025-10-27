@@ -20,6 +20,7 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
   let testEmail: string;
   let testPassword: string;
   let userId: string;
+  let accessToken: string; // Store access token for data reset in beforeEach
 
   test.beforeAll(async ({ browser }) => {
     // Generate unique test user credentials
@@ -69,9 +70,10 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
     }
 
     userId = user.id;
+    accessToken = session.access_token; // Store for beforeEach hook
 
     // Seed test transactions with user's access token
-    await createTestTransactions(userId, session.access_token, 10);
+    await createTestTransactions(userId, accessToken, 10);
 
     // Reload the page to ensure transactions are fetched with fresh data
     await page.reload();
@@ -83,13 +85,43 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
     await page.context().close();
   });
 
+  // Reset test data before each test to ensure isolation
+  test.beforeEach(async () => {
+    // Only reset if variables are initialized (skip on first run)
+    if (!userId || !accessToken) {
+      return;
+    }
+
+    // Create Supabase client WITH authentication headers to bypass RLS
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      }
+    );
+
+    // Delete existing test transactions for this user
+    await supabase
+      .from('transactions')
+      .delete()
+      .eq('user_id', userId);
+
+    // Reseed fresh test data (same as beforeAll)
+    await createTestTransactions(userId, accessToken, 10);
+
+    // Navigate to transactions page and wait for fresh data to load
+    await page.goto('/transactions');
+    await page.waitForSelector('[data-testid^="transaction-card-"]');
+  });
+
   test.describe('Transaction Recategorization from Dashboard', () => {
     test('should recategorize transaction from dashboard and update budget', async () => {
-      // This test should FAIL until T073-T077 (Transaction UI) are implemented
-      // Navigate to transactions page
-      await page.click('[data-testid="nav-transactions"]');
-      await page.waitForURL('/transactions');
-
+      // beforeEach navigates to /transactions with fresh data
       // Verify transactions are loaded
       const transactionCards = page.locator('[data-testid^="transaction-card-"]');
       await expect(transactionCards.first()).toBeVisible();
@@ -129,15 +161,27 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Click save
       await page.click('[data-testid="save-category-button"]');
 
+      // Verify modal closes after successful save
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+
       // Verify success message (use .last() since previous toasts may still be visible - auto-dismiss is 3s)
       await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
       await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Transaction recategorized to Entertainment');
 
-      // Wait for category to update in the DOM after recategorization
-      await expect(firstCard.locator('[data-testid="transaction-category"]')).toContainText('Entertainment');
+      // Wait for network to be idle (fetchTransactions completes)
+      await page.waitForLoadState('networkidle');
 
-      // Verify transaction card updates in real-time (scoped to the first card)
-      const updatedCategory = await firstCard.locator('[data-testid="transaction-category"]').textContent();
+      // Give React time to complete the render cycle after state updates
+      await page.waitForTimeout(1000);
+
+      // Re-query for the first card to avoid stale locator after re-render
+      const updatedFirstCard = page.locator('[data-testid^="transaction-card-"]').first();
+
+      // Wait for category to update in the DOM after recategorization
+      await expect(updatedFirstCard.locator('[data-testid="transaction-category"]')).toContainText('Entertainment', { timeout: 10000 });
+
+      // Verify transaction card updates in real-time (scoped to the updated first card)
+      const updatedCategory = await updatedFirstCard.locator('[data-testid="transaction-category"]').textContent();
       expect(updatedCategory).toContain('Entertainment');
 
       // TODO: PHASE 5 - Re-enable when budget category breakdown is implemented on dashboard
@@ -727,8 +771,11 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Wait for success toast
       await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
 
-      // Close modal
-      await page.click('[data-testid="close-modal-button"]');
+      // Modal should automatically close after successful save
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+
+      // Close transaction details modal
+      await page.keyboard.press('Escape');
 
       // Wait for modal to close and transaction list to update
       await expect(page.locator('[data-testid="transaction-details-modal"]')).not.toBeVisible();
@@ -811,6 +858,13 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       await expect(page.locator('[data-testid="toast-error"]')).toBeVisible({ timeout: 10000 });
       await expect(page.locator('[data-testid="toast-error"]')).toContainText('Failed to update category');
 
+      // Verify modal stays open on error (doesn't auto-close)
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+
+      // User can manually close modal after error
+      await page.click('[data-testid="cancel-category-button"]');
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+
       // Clean up - unroute to avoid affecting other tests
       await page.unroute('**/rest/v1/transactions*');
     });
@@ -834,6 +888,106 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
 
       // Verify both operations complete or appropriate error shown
       // (Implementation-dependent behavior)
+    });
+  });
+
+  test.describe('Category Modal Interactions', () => {
+    test('should close modal on X button click', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+      await page.click('[data-testid="close-category-modal"]');
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+    });
+
+    test('should close modal on backdrop click', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+
+      const backdrop = page.locator('[data-testid="category-selector"]');
+      await backdrop.click({ position: { x: 10, y: 10 } });
+
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+    });
+
+    test('should close modal on ESC key press', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+    });
+
+    test('should close modal on Cancel button click', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+      await page.click('[data-testid="cancel-category-button"]');
+      await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+    });
+
+    test('should display category icons and highlight selection', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+
+      // Verify icons are visible
+      const firstCategoryCard = page.locator('[data-testid^="category-option-"]').first();
+      await expect(firstCategoryCard.locator('svg')).toBeVisible();
+
+      // Click category and verify blue highlight
+      const entertainmentOption = page.locator('[data-testid="category-option-entertainment"]');
+      await entertainmentOption.click();
+      await expect(entertainmentOption).toHaveClass(/bg-blue-50/);
+      await expect(entertainmentOption).toHaveClass(/border-blue-500/);
+    });
+
+    test('should disable Save button when no category selected', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+
+      const saveButton = page.locator('[data-testid="save-category-button"]');
+      await expect(saveButton).toBeDisabled();
+
+      await page.click('[data-testid="category-option-entertainment"]');
+      await expect(saveButton).toBeEnabled();
+    });
+
+    test('should prevent body scroll when modal is open', async () => {
+      await page.click('[data-testid="nav-transactions"]');
+      const firstCard = page.locator('[data-testid^="transaction-card-"]').first();
+      await firstCard.click();
+      await firstCard.locator('[data-testid="recategorize-button"]').click();
+
+      await expect(page.locator('[data-testid="category-selector"]')).toBeVisible();
+
+      const bodyOverflow = await page.evaluate(() => document.body.style.overflow);
+      expect(bodyOverflow).toBe('hidden');
+
+      await page.keyboard.press('Escape');
+
+      const bodyOverflowAfter = await page.evaluate(() => document.body.style.overflow);
+      expect(bodyOverflowAfter).not.toBe('hidden');
     });
   });
 });

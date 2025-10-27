@@ -9,7 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 flex">
+      <div className="min-h-screen bg-white flex">
         {/* Left Sidebar Navigation */}
         <Sidebar />
 
