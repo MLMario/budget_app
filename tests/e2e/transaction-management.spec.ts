@@ -228,11 +228,7 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Click non-negotiable button
       await page.click('[data-testid="tag-non-negotiable-button"]');
 
-      // Verify success message (use .last() since previous toasts may still be visible - auto-dismiss is 3s)
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag added: non-negotiable');
-
-      // Verify tag badge appears
+      // Verify tag badge appears (no toast notification expected)
       await expect(page.locator('[data-testid="tag-badge-non-negotiable"]')).toBeVisible();
 
       // Close modal
@@ -255,11 +251,7 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Click tag-ignored button
       await page.click('[data-testid="tag-ignored-button"]');
 
-      // Verify success message (use .last() since previous toasts may still be visible - auto-dismiss is 3s)
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag added: ignored');
-
-      // Verify tag badge appears
+      // Verify tag badge appears (no toast notification expected)
       await expect(page.locator('[data-testid="tag-badge-ignored"]')).toBeVisible();
 
       // TODO: PHASE 5 - Re-enable when budget category breakdown is implemented on dashboard
@@ -323,38 +315,40 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
 
       const nonNegotiableButton = fourthCard.locator('[data-testid="tag-non-negotiable-button"]');
 
-      // Initial state - button should be unhighlighted (no purple background)
+      // Initial state - button should be unhighlighted (no gray background)
       await expect(nonNegotiableButton).toBeVisible();
       const initialBgClass = await nonNegotiableButton.getAttribute('class');
-      expect(initialBgClass).not.toContain('bg-purple');
+      expect(initialBgClass).not.toContain('bg-gray-100');
 
-      // Click to add tag
+      // Click to add tag (no toast notification expected)
       await nonNegotiableButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag added: non-negotiable');
 
-      // Verify button is highlighted (purple background) - optimistic update, no page refresh
-      await expect(nonNegotiableButton).toHaveClass(/bg-purple/);
+      // Wait for optimistic update to complete
+      await page.waitForTimeout(500);
+
+      // Verify button is highlighted (gray background) - optimistic update, no page refresh
+      await expect(nonNegotiableButton).toHaveClass(/bg-gray-100/);
 
       // Verify tag badge appears
       await expect(fourthCard.locator('[data-testid="tag-badge-non-negotiable"]')).toBeVisible();
 
-      // Verify button text changed to "Remove..."
-      await expect(nonNegotiableButton).toContainText('Remove Non-negotiable');
+      // Verify button text remains consistent (always "Non-negotiable")
+      await expect(nonNegotiableButton).toContainText('Non-negotiable');
 
-      // Click again to remove tag
+      // Click again to remove tag (no toast notification expected)
       await nonNegotiableButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag removed: non-negotiable');
 
-      // Verify button is unhighlighted (no purple background)
-      await expect(nonNegotiableButton).not.toHaveClass(/bg-purple/);
+      // Wait for optimistic update to complete
+      await page.waitForTimeout(500);
+
+      // Verify button is unhighlighted (no gray background)
+      await expect(nonNegotiableButton).not.toHaveClass(/bg-gray-100/);
 
       // Verify tag badge is removed
       await expect(fourthCard.locator('[data-testid="tag-badge-non-negotiable"]')).not.toBeVisible();
 
-      // Verify button text changed back to "Mark as..."
-      await expect(nonNegotiableButton).toContainText('Mark Non-negotiable');
+      // Verify button text remains consistent (always "Non-negotiable")
+      await expect(nonNegotiableButton).toContainText('Non-negotiable');
     });
 
     test('should toggle ignored tag on and off with visual state changes', async () => {
@@ -369,35 +363,37 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Initial state - button should be unhighlighted (no gray background)
       await expect(ignoredButton).toBeVisible();
       const initialBgClass = await ignoredButton.getAttribute('class');
-      expect(initialBgClass).not.toContain('bg-gray-200');
+      expect(initialBgClass).not.toContain('bg-gray-100');
 
-      // Click to add tag
+      // Click to add tag (no toast notification expected)
       await ignoredButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag added: ignored');
+
+      // Wait for optimistic update to complete
+      await page.waitForTimeout(500);
 
       // Verify button is highlighted (gray background) - optimistic update, no page refresh
-      await expect(ignoredButton).toHaveClass(/bg-gray-200/);
+      await expect(ignoredButton).toHaveClass(/bg-gray-100/);
 
       // Verify tag badge appears
       await expect(fifthCard.locator('[data-testid="tag-badge-ignored"]')).toBeVisible();
 
-      // Verify button text changed to "Restore..."
-      await expect(ignoredButton).toContainText('Restore to Budget');
+      // Verify button text remains consistent (always "Ignore")
+      await expect(ignoredButton).toContainText('Ignore');
 
-      // Click again to remove tag
+      // Click again to remove tag (no toast notification expected)
       await ignoredButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toContainText('Tag removed: ignored');
+
+      // Wait for optimistic update to complete
+      await page.waitForTimeout(500);
 
       // Verify button is unhighlighted (no gray background)
-      await expect(ignoredButton).not.toHaveClass(/bg-gray-200/);
+      await expect(ignoredButton).not.toHaveClass(/bg-gray-100/);
 
       // Verify tag badge is removed
       await expect(fifthCard.locator('[data-testid="tag-badge-ignored"]')).not.toBeVisible();
 
-      // Verify button text changed back to "Ignore from Budget"
-      await expect(ignoredButton).toContainText('Ignore from Budget');
+      // Verify button text remains consistent (always "Ignore")
+      await expect(ignoredButton).toContainText('Ignore');
     });
 
     test('should maintain mutual exclusivity with toggle - non-negotiable removes ignored', async () => {
@@ -407,26 +403,24 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       const sixthCard = transactionCards.nth(5);
       await sixthCard.click();
 
-      // First, toggle ignored tag on
+      // First, toggle ignored tag on (no toast notification expected)
       let ignoredButton = sixthCard.locator('[data-testid="tag-ignored-button"]');
       await ignoredButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
 
-      // Wait for page to refresh and re-query buttons
+      // Wait for optimistic update to complete and re-query buttons
       await page.waitForTimeout(1000);
       ignoredButton = sixthCard.locator('[data-testid="tag-ignored-button"]');
 
       // Verify ignored tag is active
       await expect(sixthCard.locator('[data-testid="tag-badge-ignored"]')).toBeVisible();
       const ignoredBgActive = await ignoredButton.getAttribute('class');
-      expect(ignoredBgActive).toContain('bg-gray-200');
+      expect(ignoredBgActive).toContain('bg-gray-100');
 
-      // Now toggle non-negotiable tag on (should remove ignored)
+      // Now toggle non-negotiable tag on (should remove ignored, no toast notification expected)
       let nonNegotiableButton = sixthCard.locator('[data-testid="tag-non-negotiable-button"]');
       await nonNegotiableButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
 
-      // Wait for page to refresh and re-query buttons
+      // Wait for optimistic update to complete and re-query buttons
       await page.waitForTimeout(1000);
       nonNegotiableButton = sixthCard.locator('[data-testid="tag-non-negotiable-button"]');
       ignoredButton = sixthCard.locator('[data-testid="tag-ignored-button"]');
@@ -434,12 +428,12 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Verify non-negotiable tag is active
       await expect(sixthCard.locator('[data-testid="tag-badge-non-negotiable"]')).toBeVisible();
       const nonNegBgActive = await nonNegotiableButton.getAttribute('class');
-      expect(nonNegBgActive).toContain('bg-purple');
+      expect(nonNegBgActive).toContain('bg-gray-100');
 
       // Verify ignored tag is removed and button is unhighlighted
       await expect(sixthCard.locator('[data-testid="tag-badge-ignored"]')).not.toBeVisible();
       const ignoredBgInactive = await ignoredButton.getAttribute('class');
-      expect(ignoredBgInactive).not.toContain('bg-gray-200');
+      expect(ignoredBgInactive).not.toContain('bg-gray-100');
     });
 
     test('should maintain mutual exclusivity with toggle - ignored removes non-negotiable', async () => {
@@ -449,26 +443,24 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       const seventhCard = transactionCards.nth(6);
       await seventhCard.click();
 
-      // First, toggle non-negotiable tag on
+      // First, toggle non-negotiable tag on (no toast notification expected)
       let nonNegotiableButton = seventhCard.locator('[data-testid="tag-non-negotiable-button"]');
       await nonNegotiableButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
 
-      // Wait for page to refresh and re-query buttons
+      // Wait for optimistic update to complete and re-query buttons
       await page.waitForTimeout(1000);
       nonNegotiableButton = seventhCard.locator('[data-testid="tag-non-negotiable-button"]');
 
       // Verify non-negotiable tag is active
       await expect(seventhCard.locator('[data-testid="tag-badge-non-negotiable"]')).toBeVisible();
       const nonNegBgActive = await nonNegotiableButton.getAttribute('class');
-      expect(nonNegBgActive).toContain('bg-purple');
+      expect(nonNegBgActive).toContain('bg-gray-100');
 
-      // Now toggle ignored tag on (should remove non-negotiable)
+      // Now toggle ignored tag on (should remove non-negotiable, no toast notification expected)
       let ignoredButton = seventhCard.locator('[data-testid="tag-ignored-button"]');
       await ignoredButton.click();
-      await expect(page.locator('[data-testid="toast-success"]').last()).toBeVisible();
 
-      // Wait for page to refresh and re-query buttons
+      // Wait for optimistic update to complete and re-query buttons
       await page.waitForTimeout(1000);
       ignoredButton = seventhCard.locator('[data-testid="tag-ignored-button"]');
       nonNegotiableButton = seventhCard.locator('[data-testid="tag-non-negotiable-button"]');
@@ -476,12 +468,12 @@ test.describe('T072 - Transaction Management E2E Tests', () => {
       // Verify ignored tag is active
       await expect(seventhCard.locator('[data-testid="tag-badge-ignored"]')).toBeVisible();
       const ignoredBgActive = await ignoredButton.getAttribute('class');
-      expect(ignoredBgActive).toContain('bg-gray-200');
+      expect(ignoredBgActive).toContain('bg-gray-100');
 
       // Verify non-negotiable tag is removed and button is unhighlighted
       await expect(seventhCard.locator('[data-testid="tag-badge-non-negotiable"]')).not.toBeVisible();
       const nonNegBgInactive = await nonNegotiableButton.getAttribute('class');
-      expect(nonNegBgInactive).not.toContain('bg-purple');
+      expect(nonNegBgInactive).not.toContain('bg-gray-100');
     });
 
     test('should show both tag buttons always visible regardless of state', async () => {

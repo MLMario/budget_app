@@ -17,6 +17,8 @@ build/
 .nyc_output
 playwright-report/
 test-results/
+tests/
+plaid_sandbox_testing/
 
 # Environment variables
 .env
