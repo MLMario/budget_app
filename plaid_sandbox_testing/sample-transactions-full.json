@@ -1,0 +1,190 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-27T03:22:57.003Z",
+    "environment": "sandbox",
+    "test_description": "Plaid Sandbox Transaction Generation Test"
+  },
+  "institution": {
+    "institution_id": "ins_109509",
+    "institution_name": "First Platypus Bank (Sandbox)",
+    "purpose": "Testing institution with transaction data"
+  },
+  "connection": {
+    "item_id": "aAEP7za4wpFJwLaEza54TmKKQ6ywG5c7nn4o5",
+    "access_token_hint": "access-sandbox-07bcf...",
+    "sync_cursor": ""
+  },
+  "accounts": [
+    {
+      "account_id": "gBrN74eQz9ikQ91M41wbip11xDa56DuAp1KE4",
+      "name": "Plaid Checking",
+      "type": "depository",
+      "subtype": "checking",
+      "mask": "0000",
+      "balances": {
+        "available": 100,
+        "current": 110,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "87xvZlLa5KsebXQkGQlnFBEELQ7zWQuDom9Wr",
+      "name": "Plaid Saving",
+      "type": "depository",
+      "subtype": "savings",
+      "mask": "1111",
+      "balances": {
+        "available": 200,
+        "current": 210,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "EAzn3jxoPeFn3PZoNZjVCNLLR63oe6CWnlo4V",
+      "name": "Plaid CD",
+      "type": "depository",
+      "subtype": "cd",
+      "mask": "2222",
+      "balances": {
+        "available": null,
+        "current": 1000,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "WZopkmElbNFEyLeDAedviZyy96x856FezEp6X",
+      "name": "Plaid Credit Card",
+      "type": "credit",
+      "subtype": "credit card",
+      "mask": "3333",
+      "balances": {
+        "available": null,
+        "current": 410,
+        "limit": 2000,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "Agl4KarMdNCnDdgp7ga4CmLLnqoD6qtqNPg9B",
+      "name": "Plaid Money Market",
+      "type": "depository",
+      "subtype": "money market",
+      "mask": "4444",
+      "balances": {
+        "available": 43200,
+        "current": 43200,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "6PwLvRMxVlCPW5y9Qy8rT5ZZe6GdBgSv73d8k",
+      "name": "Plaid IRA",
+      "type": "investment",
+      "subtype": "ira",
+      "mask": "5555",
+      "balances": {
+        "available": null,
+        "current": 320.76,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "XMNQrylqmPfd9BKJMKmntWppwybExZhoAEeb8",
+      "name": "Plaid 401k",
+      "type": "investment",
+      "subtype": "401k",
+      "mask": "6666",
+      "balances": {
+        "available": null,
+        "current": 23631.9805,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "DWr4BP3pN7HxqNavKaPBuwKKlJERZGhjqQ63p",
+      "name": "Plaid Student Loan",
+      "type": "loan",
+      "subtype": "student",
+      "mask": "7777",
+      "balances": {
+        "available": null,
+        "current": 65262,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "VQXwqb8Vn4ijQXNpDNnxUm77M1Pv4lIGMdK9L",
+      "name": "Plaid Mortgage",
+      "type": "loan",
+      "subtype": "mortgage",
+      "mask": "8888",
+      "balances": {
+        "available": null,
+        "current": 56302.06,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "wpzxqWByLEfgj76M56Qmi5XXnBMAQgSnXVWP4",
+      "name": "Plaid HSA",
+      "type": "depository",
+      "subtype": "hsa",
+      "mask": "9001",
+      "balances": {
+        "available": 6009,
+        "current": 6009,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "5NwJ5vZ3DpFlNL1MP1kghkxxB7v4EGFkrdN5q",
+      "name": "Plaid Cash Management",
+      "type": "depository",
+      "subtype": "cash management",
+      "mask": "9002",
+      "balances": {
+        "available": 12060,
+        "current": 12060,
+        "limit": null,
+        "currency": "USD"
+      }
+    },
+    {
+      "account_id": "JzGQVMPAZLfxkZRN9RMBu4xx3gmEepuz8JRBz",
+      "name": "Plaid Business Credit Card",
+      "type": "credit",
+      "subtype": "credit card",
+      "mask": "9999",
+      "balances": {
+        "available": 4980,
+        "current": 5020,
+        "limit": 10000,
+        "currency": "USD"
+      }
+    }
+  ],
+  "transactions": {
+    "total_count": 0,
+    "method": "transactionsSync",
+    "categories": [],
+    "sample_transactions": [],
+    "all_transactions": []
+  },
+  "statistics": {
+    "total_amount": 0,
+    "average_amount": 0,
+    "pending_count": 0,
+    "posted_count": 0,
+    "date_range": null
+  },
+  "notes": "No transactions found - account data is valid but transactions need more time or different institution"
+}

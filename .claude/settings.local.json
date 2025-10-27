@@ -29,7 +29,8 @@
       "Bash(fi)",
       "Bash(node test-service-layer.js:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []

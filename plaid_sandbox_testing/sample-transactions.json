@@ -1,0 +1,186 @@
+{
+  "timestamp": "2025-10-27T03:18:30.480Z",
+  "environment": "sandbox",
+  "institution_id": "ins_109508",
+  "institution_name": "Chase (Sandbox)",
+  "item_id": "ednbwP8NNbhbGZz1yV1GfZBEBbXJreFLKwerV",
+  "access_token_hint": "access-sandbox-23ea4...",
+  "accounts": [
+    {
+      "account_id": "9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr",
+      "name": "Plaid Checking",
+      "type": "depository",
+      "subtype": "checking",
+      "mask": "0000",
+      "balances": {
+        "available": 100,
+        "current": 110,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "vEQplM7GGpHDEMNzwvzEUmGDg75aZMC9RKX4K",
+      "name": "Plaid Saving",
+      "type": "depository",
+      "subtype": "savings",
+      "mask": "1111",
+      "balances": {
+        "available": 200,
+        "current": 210,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "RWnRGQ4mmRHGQj3bLobQfDpWKRZJojcm4qGrl",
+      "name": "Plaid CD",
+      "type": "depository",
+      "subtype": "cd",
+      "mask": "2222",
+      "balances": {
+        "available": null,
+        "current": 1000,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "6RDove1rroHyBELjGajBCPLA1gq8d7iV3lxMJ",
+      "name": "Plaid Credit Card",
+      "type": "credit",
+      "subtype": "credit card",
+      "mask": "3333",
+      "balances": {
+        "available": null,
+        "current": 410,
+        "iso_currency_code": "USD",
+        "limit": 2000,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "XyJzrgDXXzSKbDNXkGXbtzeNRZ3BEgfwEXxzZ",
+      "name": "Plaid Money Market",
+      "type": "depository",
+      "subtype": "money market",
+      "mask": "4444",
+      "balances": {
+        "available": 43200,
+        "current": 43200,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "DPXxB19ZZxSaEzZ8n48ECMbBkGANRetKQoX9M",
+      "name": "Plaid IRA",
+      "type": "investment",
+      "subtype": "ira",
+      "mask": "5555",
+      "balances": {
+        "available": null,
+        "current": 320.76,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "VbJlqa7RRlhNyVGKvqKyheEb5lZBvku3dVnLv",
+      "name": "Plaid 401k",
+      "type": "investment",
+      "subtype": "401k",
+      "mask": "6666",
+      "balances": {
+        "available": null,
+        "current": 23631.9805,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "wWZgqbenngH6GJLWBvWGhz96dgrjAbfBVplDy",
+      "name": "Plaid Student Loan",
+      "type": "loan",
+      "subtype": "student",
+      "mask": "7777",
+      "balances": {
+        "available": null,
+        "current": 65262,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "5v8L541KKLI1RDeaQdaRt1MmnGlR4dtqdnpez",
+      "name": "Plaid Mortgage",
+      "type": "loan",
+      "subtype": "mortgage",
+      "mask": "8888",
+      "balances": {
+        "available": null,
+        "current": 56302.06,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "JMX1V4Kgg1cRDKnVWyVDhP6BnpbdEjiVJy5Wb",
+      "name": "Plaid HSA",
+      "type": "depository",
+      "subtype": "hsa",
+      "mask": "9001",
+      "balances": {
+        "available": 6009,
+        "current": 6009,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "k7BJAxrZZJcb6PJrRvr6fN1bXEoBvGfypj8gW",
+      "name": "Plaid Cash Management",
+      "type": "depository",
+      "subtype": "cash management",
+      "mask": "9002",
+      "balances": {
+        "available": 12060,
+        "current": 12060,
+        "iso_currency_code": "USD",
+        "limit": null,
+        "unofficial_currency_code": null
+      }
+    },
+    {
+      "account_id": "le3qA9zMMqC5GaJzy8zGC8DrWMKXy5uD7qrGp",
+      "name": "Plaid Business Credit Card",
+      "type": "credit",
+      "subtype": "credit card",
+      "mask": "9999",
+      "balances": {
+        "available": 4980,
+        "current": 5020,
+        "iso_currency_code": "USD",
+        "limit": 10000,
+        "unofficial_currency_code": null
+      }
+    }
+  ],
+  "transactions": {
+    "count": 0,
+    "method": "transactionsSync",
+    "sample": [],
+    "all": [],
+    "sync_cursor": ""
+  },
+  "notes": "No transactions found - this is normal for newly created sandbox items. Try running again after a few minutes or use a different test institution."
+}

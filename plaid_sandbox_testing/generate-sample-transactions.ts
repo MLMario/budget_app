@@ -1,0 +1,473 @@
+/**
+ * Generate Sample Plaid Transaction Data
+ *
+ * Since sandbox transactions can be unpredictable, this script creates
+ * realistic sample transaction data based on Plaid's transaction structure.
+ *
+ * Run with: npx tsx plaid_sandbox_testing/generate-sample-transactions.ts
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+console.log('📝 Generating Sample Plaid Transaction Data');
+console.log('===========================================\n');
+
+// Sample transaction data based on Plaid's actual structure
+const sampleTransactions = [
+  {
+    transaction_id: 'KdDjmojBBN3t9RRAPPJ8CNPZM99oxZI5m19Vo',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 89.40,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Food and Drink', 'Restaurants'],
+    category_id: '13005000',
+    check_number: null,
+    date: '2025-10-25',
+    authorized_date: '2025-10-24',
+    name: 'STARBUCKS',
+    merchant_name: 'Starbucks',
+    pending: false,
+    pending_transaction_id: null,
+    account_owner: null,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'FOOD_AND_DRINK',
+      detailed: 'FOOD_AND_DRINK_COFFEE',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: '123 Main St',
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: '98101',
+      country: 'US',
+      lat: 47.6062,
+      lon: -122.3321,
+      store_number: '1234'
+    },
+    payment_meta: {
+      reference_number: null,
+      ppd_id: null,
+      payee: null,
+      by_order_of: null,
+      payer: null,
+      payment_method: null,
+      payment_processor: null,
+      reason: null
+    }
+  },
+  {
+    transaction_id: 'yPLmmj6776U5AMM4PPWBCJZEJLLB9khRkQqno',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 12.74,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Food and Drink', 'Restaurants', 'Fast Food'],
+    category_id: '13005032',
+    check_number: null,
+    date: '2025-10-24',
+    authorized_date: '2025-10-24',
+    name: 'MCDONALDS',
+    merchant_name: 'McDonald\'s',
+    pending: false,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'FOOD_AND_DRINK',
+      detailed: 'FOOD_AND_DRINK_FAST_FOOD',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: null,
+      country: 'US',
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  },
+  {
+    transaction_id: 'NpZ6m4B33jH1j6kkPPOeCwNkjBBK4TU5QApjr',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 156.32,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Shops', 'Supermarkets and Groceries'],
+    category_id: '19047000',
+    check_number: null,
+    date: '2025-10-23',
+    authorized_date: '2025-10-22',
+    name: 'WHOLE FOODS MARKET',
+    merchant_name: 'Whole Foods',
+    pending: false,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'FOOD_AND_DRINK',
+      detailed: 'FOOD_AND_DRINK_GROCERIES',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: '500 Market St',
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: '98102',
+      country: 'US',
+      lat: 47.6094,
+      lon: -122.3372,
+      store_number: '507'
+    }
+  },
+  {
+    transaction_id: 'rQdkmEPmmjUxmjMMddjmt7b71ppv9xu5PanGb',
+    account_id: '6RDove1rroHyBELjGajBCPLA1gq8d7iV3lxMJ',
+    amount: 45.89,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Service', 'Telecommunications Services'],
+    category_id: '17013000',
+    check_number: null,
+    date: '2025-10-22',
+    authorized_date: '2025-10-22',
+    name: 'SPOTIFY',
+    merchant_name: 'Spotify',
+    pending: false,
+    payment_channel: 'online',
+    transaction_type: 'digital',
+    personal_finance_category: {
+      primary: 'ENTERTAINMENT',
+      detailed: 'ENTERTAINMENT_MUSIC_AND_AUDIO',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: null,
+      region: null,
+      postal_code: null,
+      country: 'US',
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  },
+  {
+    transaction_id: 'wWmxqoKppnT5w8jjRRmdFjMDnppjrtC6N4jkL',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 89.99,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Travel', 'Taxi'],
+    category_id: '22016000',
+    check_number: null,
+    date: '2025-10-21',
+    authorized_date: '2025-10-21',
+    name: 'UBER',
+    merchant_name: 'Uber',
+    pending: false,
+    payment_channel: 'online',
+    transaction_type: 'special',
+    personal_finance_category: {
+      primary: 'TRANSPORTATION',
+      detailed: 'TRANSPORTATION_TAXIS_AND_RIDE_SHARES',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: null,
+      country: 'US',
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  },
+  {
+    transaction_id: 'jMxNqP8BBzSjtq66ggjQhPj3eppmG7FKQqmkM',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 2450.00,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Payment', 'Rent'],
+    category_id: '16001000',
+    check_number: null,
+    date: '2025-10-20',
+    authorized_date: '2025-10-19',
+    name: 'APARTMENT MANAGEMENT CO',
+    merchant_name: null,
+    pending: false,
+    payment_channel: 'other',
+    transaction_type: 'special',
+    personal_finance_category: {
+      primary: 'RENT_AND_UTILITIES',
+      detailed: 'RENT_AND_UTILITIES_RENT',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: null,
+      region: null,
+      postal_code: null,
+      country: null,
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  },
+  {
+    transaction_id: 'vEQzlK7EEzHjEX33PPlBCjqQRnnJw6hyPJXdM',
+    account_id: '6RDove1rroHyBELjGajBCPLA1gq8d7iV3lxMJ',
+    amount: 125.50,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Service', 'Cable'],
+    category_id: '17003000',
+    check_number: null,
+    date: '2025-10-18',
+    authorized_date: '2025-10-18',
+    name: 'COMCAST',
+    merchant_name: 'Comcast',
+    pending: false,
+    payment_channel: 'online',
+    transaction_type: 'special',
+    personal_finance_category: {
+      primary: 'RENT_AND_UTILITIES',
+      detailed: 'RENT_AND_UTILITIES_INTERNET_AND_CABLE',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: null,
+      region: null,
+      postal_code: null,
+      country: null,
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  },
+  {
+    transaction_id: 'D6Xzlp1ZZpSaEgj8qjweC9MvqGA1R2tLQ1XqP',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 67.43,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Shops', 'Pharmacies'],
+    category_id: '19043000',
+    check_number: null,
+    date: '2025-10-17',
+    authorized_date: '2025-10-17',
+    name: 'WALGREENS',
+    merchant_name: 'Walgreens',
+    pending: false,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'GENERAL_MERCHANDISE',
+      detailed: 'GENERAL_MERCHANDISE_PHARMACIES',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: '789 Broadway',
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: '98122',
+      country: 'US',
+      lat: 47.6149,
+      lon: -122.3206,
+      store_number: '5678'
+    }
+  },
+  {
+    transaction_id: 'kB7l1qRZZpSaEzj9rjXoC9NwrHB1S2uMQ2YrQ',
+    account_id: '6RDove1rroHyBELjGajBCPLA1gq8d7iV3lxMJ',
+    amount: 299.99,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Shops', 'Sporting Goods'],
+    category_id: '19015000',
+    check_number: null,
+    date: '2025-10-15',
+    authorized_date: '2025-10-15',
+    name: 'NIKE STORE',
+    merchant_name: 'Nike',
+    pending: false,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'GENERAL_MERCHANDISE',
+      detailed: 'GENERAL_MERCHANDISE_SPORTING_GOODS',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: '1234 Pine St',
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: '98101',
+      country: 'US',
+      lat: 47.6113,
+      lon: -122.3347,
+      store_number: '101'
+    }
+  },
+  {
+    transaction_id: 'lC8m2rSAAqTbFAk0sjYpD0OxsIC2T3vNR3ZsR',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 42.15,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Recreation', 'Gyms and Fitness Centers'],
+    category_id: '18032000',
+    check_number: null,
+    date: '2025-10-14',
+    authorized_date: '2025-10-14',
+    name: '24 HOUR FITNESS',
+    merchant_name: '24 Hour Fitness',
+    pending: false,
+    payment_channel: 'in store',
+    transaction_type: 'place',
+    personal_finance_category: {
+      primary: 'GENERAL_SERVICES',
+      detailed: 'GENERAL_SERVICES_GYMS_AND_FITNESS_CENTERS',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: '456 Fitness Ln',
+      city: 'Seattle',
+      region: 'WA',
+      postal_code: '98104',
+      country: 'US',
+      lat: 47.6042,
+      lon: -122.3302,
+      store_number: '245'
+    }
+  },
+  {
+    transaction_id: 'mD9n3sTBBrUcGBl1tkZqE1PytJD3U4wOS4AtS',
+    account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+    amount: 3500.00,
+    iso_currency_code: 'USD',
+    unofficial_currency_code: null,
+    category: ['Transfer', 'Deposit'],
+    category_id: '21001000',
+    check_number: null,
+    date: '2025-10-01',
+    authorized_date: '2025-10-01',
+    name: 'DIRECT DEPOSIT ACME CORP',
+    merchant_name: null,
+    pending: false,
+    payment_channel: 'other',
+    transaction_type: 'special',
+    personal_finance_category: {
+      primary: 'INCOME',
+      detailed: 'INCOME_WAGES',
+      confidence_level: 'VERY_HIGH'
+    },
+    location: {
+      address: null,
+      city: null,
+      region: null,
+      postal_code: null,
+      country: null,
+      lat: null,
+      lon: null,
+      store_number: null
+    }
+  }
+];
+
+// Create comprehensive test data
+const testData = {
+  metadata: {
+    timestamp: new Date().toISOString(),
+    environment: 'sandbox',
+    source: 'manually_generated',
+    description: 'Sample Plaid transaction data based on actual Plaid API response structure',
+  },
+  institution: {
+    institution_id: 'ins_109508',
+    institution_name: 'Chase (Sandbox)',
+  },
+  accounts: [
+    {
+      account_id: '9qXG6dg33GuENbVjWPjNC6jwrnzlEycXDvEbr',
+      name: 'Plaid Checking',
+      type: 'depository',
+      subtype: 'checking',
+      mask: '0000',
+      balances: {
+        available: 100,
+        current: 110,
+        currency: 'USD',
+      },
+    },
+    {
+      account_id: '6RDove1rroHyBELjGajBCPLA1gq8d7iV3lxMJ',
+      name: 'Plaid Credit Card',
+      type: 'credit',
+      subtype: 'credit card',
+      mask: '3333',
+      balances: {
+        available: null,
+        current: 410,
+        limit: 2000,
+        currency: 'USD',
+      },
+    },
+  ],
+  transactions: {
+    count: sampleTransactions.length,
+    all: sampleTransactions,
+    sample: sampleTransactions.slice(0, 5),
+    categories: [
+      { primary: 'FOOD_AND_DRINK', detailed: 'FOOD_AND_DRINK_COFFEE', count: 1 },
+      { primary: 'FOOD_AND_DRINK', detailed: 'FOOD_AND_DRINK_FAST_FOOD', count: 1 },
+      { primary: 'FOOD_AND_DRINK', detailed: 'FOOD_AND_DRINK_GROCERIES', count: 1 },
+      { primary: 'ENTERTAINMENT', detailed: 'ENTERTAINMENT_MUSIC_AND_AUDIO', count: 1 },
+      { primary: 'TRANSPORTATION', detailed: 'TRANSPORTATION_TAXIS_AND_RIDE_SHARES', count: 1 },
+      { primary: 'RENT_AND_UTILITIES', detailed: 'RENT_AND_UTILITIES_RENT', count: 1 },
+      { primary: 'RENT_AND_UTILITIES', detailed: 'RENT_AND_UTILITIES_INTERNET_AND_CABLE', count: 1 },
+      { primary: 'GENERAL_MERCHANDISE', detailed: 'GENERAL_MERCHANDISE_PHARMACIES', count: 1 },
+      { primary: 'GENERAL_MERCHANDISE', detailed: 'GENERAL_MERCHANDISE_SPORTING_GOODS', count: 1 },
+      { primary: 'GENERAL_SERVICES', detailed: 'GENERAL_SERVICES_GYMS_AND_FITNESS_CENTERS', count: 1 },
+      { primary: 'INCOME', detailed: 'INCOME_WAGES', count: 1 },
+    ],
+  },
+  statistics: {
+    total_amount: sampleTransactions.reduce((sum, txn) => sum + txn.amount, 0),
+    average_amount: (sampleTransactions.reduce((sum, txn) => sum + txn.amount, 0) / sampleTransactions.length).toFixed(2),
+    pending_count: sampleTransactions.filter(txn => txn.pending).length,
+    posted_count: sampleTransactions.filter(txn => !txn.pending).length,
+    date_range: {
+      earliest: '2025-10-01',
+      latest: '2025-10-25',
+    },
+  },
+  notes: 'These are realistic sample transactions based on Plaid API structure. Use this data for testing transaction import, categorization, and budget tracking features.',
+};
+
+// Save to JSON file
+const outputPath = path.join(__dirname, 'sample-transactions-realistic.json');
+fs.writeFileSync(outputPath, JSON.stringify(testData, null, 2));
+
+console.log('✅ Sample transaction data generated successfully!');
+console.log('');
+console.log('Summary:');
+console.log(`  • Total Transactions: ${testData.transactions.count}`);
+console.log(`  • Accounts: ${testData.accounts.length}`);
+console.log(`  • Categories: ${testData.transactions.categories.length}`);
+console.log(`  • Date Range: ${testData.statistics.date_range.earliest} to ${testData.statistics.date_range.latest}`);
+console.log(`  • Total Amount: $${testData.statistics.total_amount.toFixed(2)}`);
+console.log(`  • Average Transaction: $${testData.statistics.average_amount}`);
+console.log('');
+console.log('💾 Saved to: plaid_sandbox_testing/sample-transactions-realistic.json');
+console.log('');
+console.log('Transaction Categories:');
+testData.transactions.categories.forEach(cat => {
+  console.log(`  • ${cat.primary} (${cat.detailed}): ${cat.count}`);
+});

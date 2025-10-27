@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-10-27T03:17:01.803Z",
+  "error": {
+    "display_message": null,
+    "documentation_url": "https://plaid.com/docs/?ref=error#item-errors",
+    "error_code": "PRODUCT_NOT_READY",
+    "error_message": "the requested product is not yet ready. please provide a webhook or try the request again later",
+    "error_type": "ITEM_ERROR",
+    "request_id": "M1OlmmPy8z7mssV",
+    "suggested_action": null
+  },
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (C:\\Users\\mario\\apps\\budget_ai\\budget_app\\node_modules\\axios\\lib\\core\\settle.js:19:12)\n    at Unzip.handleStreamEnd (C:\\Users\\mario\\apps\\budget_ai\\budget_app\\node_modules\\axios\\lib\\adapters\\http.js:617:11)\n    at Unzip.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (C:\\Users\\mario\\apps\\budget_ai\\budget_app\\node_modules\\axios\\lib\\core\\Axios.js:45:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async testPlaidAPI (C:\\Users\\mario\\apps\\budget_ai\\budget_app\\plaid_sandbox_testing\\test-plaid-api.ts:101:34)"
+}
