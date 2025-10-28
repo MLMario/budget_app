@@ -18,7 +18,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
  * Create a "manual transactions" bank connection for test data
  * This represents manually added transactions (not from Plaid)
  */
-async function createManualBankConnection(userId: string, accessToken: string) {
+export async function createManualBankConnection(userId: string, accessToken: string) {
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
@@ -178,4 +178,100 @@ export async function deleteTestTransactions(userId: string) {
     console.error('Error deleting test transactions:', error);
     throw error;
   }
+}
+
+/**
+ * Create test budget with transactions for E2E testing
+ *
+ * This helper seeds a complete test environment for budget management tests:
+ * - Creates a manual bank connection
+ * - Seeds test transactions with known amounts for predictable testing
+ * - Returns bankConnectionId for use in tests
+ *
+ * @param userId - The user ID to create budget data for
+ * @param accessToken - Access token for authenticated requests (bypasses RLS)
+ * @param options - Optional configuration for test data
+ */
+export async function createTestBudgetData(
+  userId: string,
+  accessToken: string,
+  options: {
+    transactionCount?: number;
+    categoryAmounts?: { [key: string]: number };
+  } = {}
+) {
+  const { transactionCount = 0, categoryAmounts = {} } = options;
+
+  // Create client with user's access token to bypass RLS
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+
+  // Create a manual bank connection for test transactions
+  const bankConnectionId = await createManualBankConnection(userId, accessToken);
+
+  // If transaction count specified, create test transactions
+  if (transactionCount > 0) {
+    await createTestTransactions(userId, accessToken, transactionCount);
+  }
+
+  return { bankConnectionId };
+}
+
+/**
+ * Insert a single test transaction
+ * Useful for budget testing where specific transaction amounts are needed
+ *
+ * @param userId - The user ID
+ * @param accessToken - Access token for authenticated requests
+ * @param bankConnectionId - The bank connection ID to associate with
+ * @param transaction - Transaction data
+ */
+export async function insertTestTransaction(
+  userId: string,
+  accessToken: string,
+  bankConnectionId: string,
+  transaction: {
+    merchant_name: string;
+    amount: number;
+    category_primary: string;
+    category_detailed: string;
+    date?: string;
+  }
+) {
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data, error } = await supabase.from('transactions').insert({
+    user_id: userId,
+    bank_connection_id: bankConnectionId,
+    date: transaction.date || today,
+    merchant_name: transaction.merchant_name,
+    amount: transaction.amount,
+    category_primary: transaction.category_primary,
+    category_detailed: transaction.category_detailed,
+    plaid_transaction_id: `test_${transaction.merchant_name.toLowerCase().replace(/\s/g, '_')}_${Date.now()}`,
+    payment_channel: 'online',
+    pending: false,
+    tag_non_negotiable: false,
+    tag_ignored: false,
+  }).select();
+
+  if (error) {
+    console.error('Error inserting test transaction:', error);
+    throw error;
+  }
+
+  return data?.[0];
 }

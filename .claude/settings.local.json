@@ -30,7 +30,11 @@
       "Bash(node test-service-layer.js:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(while read file)",
+      "Bash(done)",
+      "Bash(bash:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

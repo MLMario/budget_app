@@ -257,40 +257,40 @@ description: "Implementation tasks for AI-Powered Proactive Budget App"
 
 ### Tests for User Story 3 (Write FIRST - ensure they FAIL before implementation)
 
-- [ ] T087 [P] [US3] Unit test for budget CRUD in `tests/unit/budget.service.test.ts` (create, read, update, delete budgets)
-- [ ] T088 [P] [US3] Unit test for spending calculation in `tests/unit/budget.service.test.ts` (sum transactions by category, exclude ignored)
-- [ ] T089 [P] [US3] Unit test for percentage calculation in `tests/unit/budget.service.test.ts` (spent / budgeted * 100, color indicators)
-- [ ] T090 [P] [US3] Unit test for future budget creation in `tests/unit/budget.service.test.ts` (copy from last month, use 3-month average, custom amounts)
-- [ ] T091 [US3] Integration test for budget tracking in `tests/integration/budget-tracking.test.ts` (create budget → add transaction → verify progress updates)
-- [ ] T092 [US3] E2E test for budget management in `tests/e2e/budget-management.spec.ts` (create budget, edit amounts, add transaction, see progress bar change colors)
+- [x] T087 [P] [US3] Unit test for budget CRUD in `tests/unit/budget.service.test.ts` (create, read, update, delete budgets)
+- [x] T088 [P] [US3] Unit test for spending calculation in `tests/unit/budget.service.test.ts` (sum transactions by category, exclude ignored)
+- [x] T089 [P] [US3] Unit test for percentage calculation in `tests/unit/budget.service.test.ts` (spent / budgeted * 100, color indicators)
+- [x] T090 [P] [US3] Unit test for future budget creation in `tests/unit/budget.service.test.ts` (copy from last month, use 3-month average, custom amounts)
+- [x] T091 [US3] Integration test for budget tracking in `tests/integration/budget-tracking.test.ts` (create budget → add transaction → verify progress updates)
+- [x] T092 [US3] E2E test for budget management in `tests/e2e/budget-management.spec.ts` (create budget, edit amounts, add transaction, see progress bar change colors)
 
 ### Implementation for User Story 3
 
 #### Budget UI
 
-- [ ] T093 [US3] Create budgets page in `app/(dashboard)/budgets/page.tsx` with current month overview, category breakdowns, and edit controls
-- [ ] T094 [US3] Create budget overview card in `components/budget/BudgetOverview.tsx` showing total budget, total spent, percentage used, days remaining, average daily budget
-- [ ] T095 [US3] Create budget category card in `components/budget/BudgetCategoryCard.tsx` with category name, budgeted amount, spent amount, progress bar with color coding
-- [ ] T096 [US3] Create budget edit modal in `components/budget/BudgetEditModal.tsx` for updating category amounts
-- [ ] T097 [US3] Create month selector component in `components/budget/MonthSelector.tsx` for navigating between budget months
+- [x] T093 [US3] Create budgets page in `app/(dashboard)/budgets/page.tsx` with current month overview, category breakdowns, and edit controls
+- [x] T094 [US3] Create budget overview card in `components/budget/BudgetOverview.tsx` showing total budget, total spent, percentage used, days remaining, average daily budget
+- [x] T095 [US3] Create budget category card in `components/budget/BudgetCategoryCard.tsx` with category name, budgeted amount, spent amount, progress bar with color coding
+- [x] T096 [US3] Create budget edit modal in `components/budget/BudgetEditModal.tsx` for updating category amounts
+- [x] T097 [US3] Create month selector component in `components/budget/MonthSelector.tsx` for navigating between budget months
 
 #### Budget Logic Enhancements
 
-- [ ] T098 [US3] Add real-time spending tracking in `services/budget.service.ts` (query transactions by month/year, filter by category, sum amounts)
-- [ ] T099 [US3] Add warning/alert indicator logic in `services/budget.service.ts` (calculateStatus function returns on_track/warning/alert based on percentage)
-- [ ] T100 [US3] Add budget comparison logic in `services/budget.service.ts` (compareBudgets function for month-over-month analysis)
+- [x] T098 [US3] Add real-time spending tracking in `services/budget.service.ts` (query transactions by month/year, filter by category, sum amounts)
+- [x] T099 [US3] Add warning/alert indicator logic in `services/budget.service.ts` (calculateStatus function returns on_track/warning/alert based on percentage)
+- [x] T100 [US3] Add budget comparison logic in `services/budget.service.ts` (compareBudgets function for month-over-month analysis)
 
 #### Future Budget Creation
 
-- [ ] T101 [US3] Create future budget modal in `components/budget/FutureBudgetModal.tsx` with options: copy last month, use 3-month average, custom
-- [ ] T102 [US3] Implement copy budget logic in `services/budget.service.ts` (copyFromPreviousMonth function)
-- [ ] T103 [US3] Implement average budget logic in `services/budget.service.ts` (calculateThreeMonthAverage function)
+- [x] T101 [US3] Create future budget modal in `components/budget/FutureBudgetModal.tsx` with options: copy last month, use 3-month average, custom
+- [x] T102 [US3] Implement copy budget logic in `services/budget.service.ts` (copyFromPreviousMonth function)
+- [x] T103 [US3] Implement average budget logic in `services/budget.service.ts` (calculateThreeMonthAverage function)
 
 #### Visual Indicators
 
-- [ ] T104 [US3] Add color-coded progress bars in `components/budget/BudgetCategoryCard.tsx` (green < 80%, yellow 80-100%, red > 100%)
-- [ ] T105 [US3] Create warning badge component in `components/ui/WarningBadge.tsx` for 90%+ spending categories
-- [ ] T106 [US3] Create alert badge component in `components/ui/AlertBadge.tsx` for 100%+ spending categories with "Over by $X" text
+- [x] T104 [US3] Add color-coded progress bars in `components/budget/BudgetCategoryCard.tsx` (green < 80%, yellow 80-100%, red > 100%)
+- [x] T105 [US3] Create warning badge component in `components/ui/WarningBadge.tsx` for 90%+ spending categories
+- [x] T106 [US3] Create alert badge component in `components/ui/AlertBadge.tsx` for 100%+ spending categories with "Over by $X" text
 
 **Checkpoint**: User Story 3 complete - users can create/track budgets, see real-time progress, warnings/alerts, and plan future months
 
