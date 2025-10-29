@@ -313,7 +313,7 @@ export async function updateBudgetCategory(
     const { error } = await supabase
       .from('budget_categories')
       .update({ budgeted_amount: newAmount })
-      .eq('id', categoryId)
+      .eq('category_id', categoryId)
       .eq('budget_id', budgetId);
 
     if (error) {

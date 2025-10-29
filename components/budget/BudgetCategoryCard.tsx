@@ -86,7 +86,7 @@ export function BudgetCategoryCard({
               size="sm"
               onClick={() => onEdit(categoryId)}
               aria-label={`Edit ${categoryName} budget`}
-              data-testid={`edit-budget-${categoryId}`}
+              data-testid="edit-budget-button"
             >
               Edit
             </Button>
@@ -96,10 +96,10 @@ export function BudgetCategoryCard({
         {/* Amount display */}
         <div className="flex items-baseline justify-between">
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900" data-testid="spent-amount">
               {formatCurrency(spentAmount)}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500" data-testid="budgeted-amount">
               of {formatCurrency(budgetedAmount)} budgeted
             </span>
           </div>
@@ -117,7 +117,9 @@ export function BudgetCategoryCard({
         />
 
         {/* Status text */}
-        <p className={cn('text-sm font-medium', statusColor)}>{statusText}</p>
+        <p className={cn('text-sm font-medium', statusColor)} data-testid="budget-status-text">
+          {statusText}
+        </p>
       </CardContent>
     </Card>
   );

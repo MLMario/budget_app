@@ -103,7 +103,7 @@ export function BudgetOverview({
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">Total Budget</p>
-              <p className="text-2xl font-semibold text-gray-700">
+              <p className="text-2xl font-semibold text-gray-700" data-testid="total-budget-amount">
                 {formatCurrency(totalBudget)}
               </p>
             </div>

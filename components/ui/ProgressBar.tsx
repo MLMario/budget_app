@@ -100,6 +100,7 @@ export function ProgressBar({
           aria-valuemin={0}
           aria-valuemax={max}
           aria-label={label || 'Progress'}
+          data-testid="progress-bar"
         />
       </div>
 

@@ -44,15 +44,21 @@ Lesson from Fix #2: Parentheses exclude folders from URL paths. 5. Database Sche
 Always verify service code matches actual database schema
 Example: category vs category_primary mismatch caught in Fix #3
 
-6. E2E Testing Requirements
+5. E2E Testing Requirements
 -ALL interactive elements need data-testid attributes
-Test setup MUST seed realistic data (all required fields)
+- You must make sure to use data-testid attribute names are the ones used in the code base 
+- If there is an attribute name that you need and it hasn't been implemented. Reported a list of attributes that need implementation after you are done writting e2e testing.  
+- Test setup MUST seed realistic data (all required fields)
+
 Pattern: data-testid="action-element" format
 Always wait for React re-renders after state-changing actions
 Prefer waitForFunction over setTimeout for deterministic tests
 Test isolation is critical - clear state between tests
 Playwright error snapshots capture state AFTER errors, not during
 Disabled buttons should never be clicked - test logic needs revision
+
+6
+
 
 ## Recent Changes
 

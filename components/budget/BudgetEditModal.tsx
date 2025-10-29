@@ -156,7 +156,7 @@ export function BudgetEditModal({
               />
             </div>
             {error && (
-              <p id="budget-error" className="mt-2 text-sm text-red-600" role="alert">
+              <p id="budget-error" className="mt-2 text-sm text-red-600" role="alert" data-testid="budget-error">
                 {error}
               </p>
             )}
@@ -183,6 +183,7 @@ export function BudgetEditModal({
                       'font-semibold',
                       parseFloat(amount) > currentAmount ? 'text-green-600' : 'text-red-600'
                     )}
+                    data-testid="budget-change-preview"
                   >
                     {parseFloat(amount) > currentAmount ? '+' : ''}
                     {formatCurrency(parseFloat(amount) - currentAmount)}

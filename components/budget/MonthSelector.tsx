@@ -69,19 +69,20 @@ export function MonthSelector({
       className={cn('flex items-center justify-between gap-4', className)}
       role="navigation"
       aria-label="Budget month navigation"
+      data-testid="month-selector"
     >
       <Button
         variant="outline"
         size="sm"
         onClick={handlePrevious}
         aria-label="Previous month"
-        data-testid="month-selector-prev"
+        data-testid="previous-month-button"
       >
         ← Previous
       </Button>
 
       <div className="flex items-center gap-3">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900" data-testid="current-month-display">
           {monthName} {currentYear}
         </h2>
         {!isCurrentMonth && (
@@ -101,7 +102,7 @@ export function MonthSelector({
         size="sm"
         onClick={handleNext}
         aria-label="Next month"
-        data-testid="month-selector-next"
+        data-testid="next-month-button"
       >
         Next →
       </Button>
