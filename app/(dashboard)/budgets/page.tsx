@@ -97,6 +97,38 @@ export default function BudgetsPage() {
     loadBudget();
   }, [userId, currentMonth, currentYear]);
 
+  // Refresh budget when page becomes visible (user switches back to tab)
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleVisibilityChange = async () => {
+      // Only refresh when page becomes visible (not when hiding)
+      if (document.visibilityState === 'visible') {
+        console.log('[Budget Page] Tab became visible, refreshing budget data...');
+
+        try {
+          setIsLoading(true);
+          const budgetData = await getBudgetByMonthAction(userId, currentMonth, currentYear);
+
+          if (budgetData) {
+            setBudget(budgetData);
+          }
+        } catch (err) {
+          console.error('Error refreshing budget on visibility change:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, currentMonth, currentYear]);
+
   const handleMonthChange = (month: number, year: number) => {
     setCurrentMonth(month);
     setCurrentYear(year);
