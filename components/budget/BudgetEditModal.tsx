@@ -56,8 +56,8 @@ export function BudgetEditModal({
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty string, numbers, and decimal point
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+    // Allow empty string, numbers, decimal point, and negative sign
+    if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
       setAmount(value);
       setError(null);
     }

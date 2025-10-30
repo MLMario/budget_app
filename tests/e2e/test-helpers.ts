@@ -275,3 +275,67 @@ export async function insertTestTransaction(
 
   return data?.[0];
 }
+
+/**
+ * Extract budget amount for a specific category card from the UI
+ * @param page - The Playwright page object
+ * @param categoryId - The UUID of the category
+ * @returns The budget amount as a number
+ */
+export async function extractBudgetAmount(page: any, categoryId: string): Promise<number> {
+  const card = page.locator(`[data-testid="budget-category-card-${categoryId}"]`);
+  const budgetedAmountText = await card.locator('[data-testid="budgeted-amount"]').textContent();
+  return parseFloat(budgetedAmountText?.match(/\$[\d,]+/)?.[0].replace(/[$,]/g, '') || '0');
+}
+
+/**
+ * Extract total budget amount from the UI
+ * @param page - The Playwright page object
+ * @returns The total budget amount as a number
+ */
+export async function extractTotalBudget(page: any): Promise<number> {
+  const totalBudgetText = await page.locator('[data-testid="total-budget-amount"]').textContent();
+  return parseFloat(totalBudgetText?.replace(/[$,]/g, '') || '0');
+}
+
+/**
+ * Insert a test transaction with optional percentage-based calculation
+ * @param userId - The user ID
+ * @param accessToken - Access token for authenticated requests
+ * @param bankConnectionId - The bank connection ID
+ * @param page - The Playwright page object (for percentage calculations)
+ * @param transaction - Transaction data
+ * @param percentageOfBudget - Optional percentage of budget to calculate amount
+ */
+export async function insertTestTransactionWithPercentage(
+  userId: string,
+  accessToken: string,
+  bankConnectionId: string,
+  page: any,
+  transaction: {
+    merchant_name: string;
+    amount?: number;
+    category_primary: string;
+    category_detailed: string;
+    category_id?: string;
+    date?: string;
+  },
+  percentageOfBudget?: number
+) {
+  let finalAmount = transaction.amount;
+
+  // If percentage specified and category_id provided, calculate amount based on budget
+  if (percentageOfBudget !== undefined && transaction.category_id) {
+    const budgetAmount = await extractBudgetAmount(page, transaction.category_id);
+    finalAmount = budgetAmount * percentageOfBudget;
+  }
+
+  // Use the existing insertTestTransaction function with calculated amount
+  return insertTestTransaction(userId, accessToken, bankConnectionId, {
+    merchant_name: transaction.merchant_name,
+    amount: finalAmount!,
+    category_primary: transaction.category_primary,
+    category_detailed: transaction.category_detailed,
+    date: transaction.date,
+  });
+}

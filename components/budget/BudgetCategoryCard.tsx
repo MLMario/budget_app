@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils/cn';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Button } from '@/components/ui/Button';
+import { WarningBadge } from '@/components/ui/WarningBadge';
+import { AlertBadge } from '@/components/ui/AlertBadge';
 
 export interface BudgetCategoryCardProps {
   categoryId: string;
@@ -115,6 +117,18 @@ export function BudgetCategoryCard({
           size="md"
           showPercentage={false}
         />
+
+        {/* Warning and Alert Badges */}
+        <div className="flex gap-2">
+          <WarningBadge
+            percentage={percentage}
+            remaining={budgetedAmount - spentAmount}
+          />
+          <AlertBadge
+            percentage={percentage}
+            overAmount={spentAmount - budgetedAmount}
+          />
+        </div>
 
         {/* Status text */}
         <p className={cn('text-sm font-medium', statusColor)} data-testid="budget-status-text">
