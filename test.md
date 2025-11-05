@@ -1,7 +1,7 @@
 
 
 # Budget App Constitution - Concise Version
-
+TEST
 **I. Security-First Architecture (NON-NEGOTIABLE)**
 - Financial data encrypted at rest and in transit (AES-256, TLS 1.3+)
 - No secrets in code - environment variables only
